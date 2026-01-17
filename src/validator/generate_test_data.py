@@ -52,8 +52,27 @@ def generate_row(is_valid, num_columns=75):
         else:
             row.append(round(random.uniform(10, 10000), 2))
             
-    # Col 5 to 75: Filler Data
-    for i in range(5, num_columns + 1):
+    # Col 5: Account Type
+    acct_types = ["Savings", "Current", "Corporate"]
+    if is_valid:
+        row.append(random.choice(acct_types))
+    else:
+        if random.random() < 0.3:
+            row.append("Unknown_Type") # Invalid account
+        else:
+            row.append(random.choice(acct_types))
+
+    # Col 6: Risk Score (0-100)
+    if is_valid:
+        row.append(random.randint(0, 100))
+    else:
+        if random.random() < 0.3:
+            row.append(999) # Invalid score > 100
+        else:
+            row.append(random.randint(0, 100))
+
+    # Col 7 to 75: Filler Data
+    for i in range(7, num_columns + 1):
         row.append(f"Val_{i}_{random.randint(100,999)}")
         
     # Ensure invalid file has at least one error if purely random choices accidentally made it valid

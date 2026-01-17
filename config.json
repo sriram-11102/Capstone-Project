@@ -20,7 +20,10 @@
             "1C STARTS_WITH \"TXN\"",
             "3C MATCHES \"(USD|EUR|GBP|INR|JPY)\"",
             "4C IS NUMERIC",
-            "4C > 0"
+            "4C > 0",
+            "5C MATCHES \"(Savings|Current|Corporate)\"",
+            "6C IS NUMERIC",
+            "6C <= 100"
         ],
         "default_rules": [
             "1C REQUIRED"
