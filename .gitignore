@@ -13,3 +13,7 @@ validator.log
 .env
 venv/
 .pytest_cache/
+
+input/
+processed/
+rejected/
