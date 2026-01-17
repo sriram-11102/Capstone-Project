@@ -38,8 +38,8 @@
             min-height: 100vh;
             display: grid;
             grid-template-columns: 280px 1fr;
-            /* Allow body to scroll if needed on small screens, but prefer main scroll */
-            overflow-x: hidden;
+            overflow: hidden;
+            /* Main scroll handled by main element */
         }
 
         /* Sidebar */
@@ -50,8 +50,6 @@
             display: flex;
             flex-direction: column;
             gap: 2rem;
-            position: sticky;
-            top: 0;
             height: 100vh;
         }
 
@@ -65,6 +63,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            cursor: pointer;
         }
 
         .logo::before {
@@ -124,9 +123,9 @@
             display: flex;
             flex-direction: column;
             gap: 2rem;
-            /* Ensure main content scrolls properly */
             overflow-y: auto;
             max-height: 100vh;
+            scroll-behavior: smooth;
         }
 
         header {
@@ -145,10 +144,78 @@
             color: var(--text-muted);
         }
 
+        /* LIVE STATUS BAR */
+        .live-status-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .status-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .status-card.processing::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--warning);
+        }
+
+        .status-card.incident::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--error);
+        }
+
+        .sc-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .sc-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.1rem;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--warning);
+            border-radius: 50%;
+            animation: blink 1s infinite;
+        }
+
         /* KPI Grid */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
         }
 
@@ -161,16 +228,6 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-        }
-
-        .card::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
         }
 
         .kpi-label {
@@ -216,7 +273,7 @@
             position: relative;
         }
 
-        /* Rules & Logs Tables */
+        /* Tables */
         .table-container {
             width: 100%;
             overflow-x: auto;
@@ -233,6 +290,7 @@
             padding: 1rem;
             color: var(--text-muted);
             border-bottom: 1px solid var(--border);
+            font-weight: 600;
         }
 
         td {
@@ -243,6 +301,23 @@
         tr:hover {
             background: var(--surface-hover);
             cursor: pointer;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .badge-inc {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .badge-ok {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
         }
 
         /* Modal */
@@ -316,6 +391,7 @@
             font-size: 0.9rem;
             max-height: 400px;
             overflow-y: auto;
+            scroll-behavior: smooth;
         }
 
         .log-entry {
@@ -371,6 +447,18 @@
                 box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
             }
         }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
     </style>
 </head>
 
@@ -378,46 +466,52 @@
     <aside>
         <div class="logo">VALIDATOR</div>
         <nav>
-            <button class="active">Overview</button>
-            <button onclick="scrollToSection('incidents')">Recents Incidents</button>
-            <button onclick="scrollToSection('rules')">Rulesets</button>
+            <button class="active" onclick="scrollToId('overview')">Overview</button>
+            <button onclick="scrollToId('live-feed')">System State</button>
+            <button onclick="scrollToId('incidents')">Recent Incidents</button>
+            <button onclick="scrollToId('rules')">Active Rulesets</button>
         </nav>
         <div class="sys-status" id="sys-status">SYSTEM ONLINE</div>
     </aside>
 
-    <main>
-        <header>
+    <main id="main-scroll">
+        <header id="overview">
             <div>
                 <h1>Command Center</h1>
-                <div class="subtitle">Live System Telemetry</div>
+                <div class="subtitle">Real-Time Validation Operations</div>
             </div>
             <button onclick="updateDashboard()"
                 style="padding: 0.75rem 1.5rem; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">Refresh
-                Now</button>
+                Data</button>
         </header>
+
+        <!-- LIVE STATE ROW (NEW) -->
+        <div class="live-status-bar" id="live-feed">
+            <div class="status-card processing">
+                <div class="sc-label">Current File Processing</div>
+                <div class="sc-value" id="current-file">
+                    <span style="color: var(--text-muted)">Idle</span>
+                </div>
+            </div>
+            <div class="status-card incident">
+                <div class="sc-label">Latest Incident Created</div>
+                <div class="sc-value" id="latest-incident">
+                    <span style="color: var(--text-muted)">--</span>
+                </div>
+            </div>
+        </div>
 
         <!-- KPIS -->
         <div class="kpi-grid">
             <div class="card">
                 <div class="kpi-label">Total Transactions</div>
                 <div class="kpi-value" id="kpi-processed">--</div>
-                <div class="kpi-trend trend-up">▲ 24h Activity</div>
-            </div>
-            <div class="card">
-                <div class="kpi-label">Success Rate</div>
-                <div class="kpi-value" id="kpi-success">--%</div>
-                <div class="kpi-trend trend-up">Operational</div>
+                <div class="kpi-trend trend-up">▲ Dynamic</div>
             </div>
             <div class="card">
                 <div class="kpi-label">Active Alerts</div>
                 <div class="kpi-value" style="color: var(--error)" id="kpi-alerts">--</div>
-                <div class="kpi-trend trend-down">Incidents Pending</div>
-            </div>
-            <div class="card">
-                <div class="kpi-label">Server Status</div>
-                <div class="kpi-value" style="color: var(--success); font-size: 1.5rem; line-height: 2.5rem;">HEALTHY
-                </div>
-                <div class="kpi-trend">Latency: 12ms</div>
+                <div class="kpi-trend trend-down">Pending Action</div>
             </div>
         </div>
 
@@ -439,15 +533,16 @@
 
         <!-- Recent Alerts Table -->
         <div class="card" id="incidents">
-            <div class="kpi-label" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text)">Recent Incidents &
-                Alerts</div>
+            <div class="kpi-label" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text)">Incident History
+            </div>
             <div class="table-container">
                 <table id="alert-table">
                     <thead>
                         <tr>
                             <th>Time</th>
-                            <th>Type</th>
-                            <th>Message</th>
+                            <th>Severity</th>
+                            <th>Event</th>
+                            <th>Details</th>
                         </tr>
                     </thead>
                     <tbody><!-- Populated via JS --></tbody>
@@ -463,7 +558,7 @@
                 <table id="ruleset-table">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th>Ruleset Name</th>
                             <th>Rule Count</th>
                             <th>Status</th>
                         </tr>
@@ -475,7 +570,7 @@
 
         <!-- Logs -->
         <div class="card">
-            <div class="kpi-label" style="margin-bottom: 1rem">Live Terminal Options</div>
+            <div class="kpi-label" style="margin-bottom: 1rem">Raw System Terminal</div>
             <div class="terminal" id="terminal-feed">
                 <!-- Logs will be injected here -->
             </div>
@@ -499,22 +594,18 @@
     <script>
         const API_BASE = window.location.origin;
 
-        // --- Mock Data for Charts (Dynamic real data would require history API) --
+        // --- Charts ---
         const ctxVol = document.getElementById('volumeChart').getContext('2d');
         const volChart = new Chart(ctxVol, {
             type: 'line',
             data: {
-                labels: ['10:00', '11:00', '12:00', '13:00', '14:00'],
+                labels: ['1m', '2m', '3m', '4m', '5m'],
                 datasets: [{
-                    label: 'Files Processed',
-                    data: [120, 190, 300, 500, 250],
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                    fill: true,
-                    tension: 0.4
+                    label: 'Processed', data: [100, 300, 150, 400, 200],
+                    borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#27272a' } } } }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { color: '#27272a' } } } }
         });
 
         const ctxMix = document.getElementById('mixChart').getContext('2d');
@@ -522,101 +613,126 @@
             type: 'doughnut',
             data: {
                 labels: ['Valid', 'Invalid'],
-                datasets: [{
-                    data: [85, 15],
-                    backgroundColor: ['#10b981', '#ef4444'],
-                    borderWidth: 0
-                }]
+                datasets: [{ data: [90, 10], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }]
             },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right' } } }
         });
 
-        // --- Data Fetching ---
+        // --- Logic ---
+
+        // State tracking
+        let currentFile = "";
+        let lastIncident = "";
+
+        function scrollToId(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Sidebar active state
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
 
         async function updateDashboard() {
             try {
-                // Fetch Stats
+                // 1. Stats
                 const resStats = await fetch(`${API_BASE}/stats`);
                 const stats = await resStats.json();
-
                 document.getElementById('kpi-processed').innerText = stats.files_processed.toLocaleString();
-                document.getElementById('kpi-success').innerText = stats.success_rate + "%";
                 document.getElementById('kpi-alerts').innerText = stats.active_alerts;
 
-                // Fetch Logs & Process for Alerts
+                // 2. Logs & Parsing
                 const resLogs = await fetch(`${API_BASE}/logs`);
                 const logData = await resLogs.json();
-                const logs = logData.logs.reverse(); // Newest first
+                // Logs come oldest -> newest (tail), but usually we want newest first in UI
+                // API implementation: returns lines[-50:]. So index 0 is oldest of that chunk.
+                const logs = logData.logs.slice().reverse();
 
-                // Update Terminal
                 const terminal = document.getElementById('terminal-feed');
                 terminal.innerHTML = '';
-
                 const alertTbody = document.querySelector('#alert-table tbody');
                 alertTbody.innerHTML = '';
 
                 logs.forEach(line => {
-                    // Terminal Entry
+                    // PARSING LOGIC
+
+                    // Track Current File
+                    if (line.includes('Processing file:')) {
+                        // Extract filename. Format: "... Processing file: F:\Path\To\File.txt"
+                        const parts = line.split('\\');
+                        const fname = parts[parts.length - 1].trim();
+                        // Only update if it's the *most recent* (since we iterate reverse, first one we see is newest)
+                        if (!currentFile || line > currentFile) {
+                            currentFile = fname;
+                            document.getElementById('current-file').innerHTML = `<div class="pulse-dot"></div> ${fname}`;
+                        }
+                    }
+
+                    // Track Incidents
+                    if (line.includes('Incident created successfully:')) {
+                        // Format: "... Incident created successfully: INC0010004"
+                        const parts = line.split(':');
+                        const incId = parts[parts.length - 1].trim();
+                        lastIncident = incId;
+                        document.getElementById('latest-incident').innerHTML = `<span style="color: var(--error)">${incId}</span>`;
+                    }
+
+                    // TERMINAL RENDER
                     const row = document.createElement('div');
                     row.className = 'log-entry';
-                    if (line.includes('[EMAIL]') || line.includes('[SERVICENOW]')) row.classList.add('success');
-                    if (line.includes('ERROR') || line.includes('failed')) row.classList.add('error');
-
                     const time = line.substring(0, 19);
                     const msg = line.substring(20);
+
+                    if (line.includes('ERROR') || line.includes('failed')) row.classList.add('error');
+                    else if (line.includes('[EMAIL]') || line.includes('[SERVICENOW]') || line.includes('successful')) row.classList.add('success');
 
                     row.innerHTML = `<span class="log-time">${time}</span><span class="log-msg">${msg}</span>`;
                     terminal.appendChild(row);
 
-                    // Alert Table Entry
-                    if (line.includes('[EMAIL]') || line.includes('[SERVICENOW]') || line.includes('ERROR')) {
+                    // ALERTS TABLE RENDER
+                    if (line.includes('ERROR') || line.includes('Incident') || line.includes('EMAIL')) {
                         const tr = document.createElement('tr');
-                        let type = "SYSTEM";
-                        if (line.includes('EMAIL')) type = "EMAIL ALERT";
-                        if (line.includes('SERVICENOW')) type = "INCIDENT";
-                        if (line.includes('ERROR')) type = "VALIDATION FAIL";
+                        let type = "INFO";
+                        let badge = "badge-ok";
 
-                        tr.innerHTML = `<td>${time}</td><td style="font-weight:bold; color: ${type.includes('FAIL') ? 'var(--error)' : 'var(--success)'}">${type}</td><td>${msg}</td>`;
+                        if (line.includes('ERROR')) { type = "FAILURE"; badge = "badge-inc"; }
+                        else if (line.includes('Incident')) { type = "TICKET"; badge = "badge-inc"; }
+                        else if (line.includes('EMAIL')) { type = "ALERT"; badge = "badge-ok"; }
+
+                        tr.innerHTML = `<td>${time}</td><td><span class="badge ${badge}">${type}</span></td><td>System Event</td><td>${msg}</td>`;
                         alertTbody.appendChild(tr);
                     }
                 });
 
-                // Fetch Rulesets
+                // 3. Rulesets
                 const resRules = await fetch(`${API_BASE}/rulesets`);
                 const rules = await resRules.json();
                 const rulesTbody = document.querySelector('#ruleset-table tbody');
                 rulesTbody.innerHTML = '';
-
                 Object.keys(rules).forEach(name => {
                     const tr = document.createElement('tr');
                     tr.onclick = () => showRuleset(name, rules[name]);
-                    tr.innerHTML = `<td>${name}</td><td>${rules[name].length} Rules</td><td><span style="color:var(--success)">Active</span></td>`;
+                    tr.innerHTML = `<td><span style="font-weight:700; color:var(--primary)">${name}</span></td><td>${rules[name].length} Rules</td><td><span class="badge badge-ok">Active</span></td>`;
                     rulesTbody.appendChild(tr);
                 });
 
             } catch (e) { console.error(e); }
         }
 
-        // --- UI Interactions ---
-
+        // --- Modals ---
         function showRuleset(name, rules) {
             document.getElementById('modal-title').innerText = name;
             const content = document.getElementById('modal-content');
             content.innerHTML = rules.map(r => `<div class="rule-item">${r}</div>`).join('');
             document.getElementById('rule-modal').classList.add('open');
         }
-
         function closeModal(e) {
             if (!e || e.target.id === 'rule-modal' || !e.target.closest('.modal')) {
                 document.getElementById('rule-modal').classList.remove('open');
             }
         }
 
-        function scrollToSection(id) {
-            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-        }
-
-        setInterval(updateDashboard, 2000);
+        setInterval(updateDashboard, 1000); // 1s refresh for "Real Time" feel
         updateDashboard();
     </script>
 </body>
