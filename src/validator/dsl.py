@@ -267,7 +267,8 @@ def p_validation_rule(p):
 # Value for comparison (can be number or string, but not column reference)
 def p_value(p):
     """value : NUMBER
-    | STRING"""
+    | STRING
+    | COLUMN_REF"""
     p[0] = p[1]
 
 
@@ -457,6 +458,11 @@ class DSLInterpreter:
             operator = rule["operator"]
             expected_value = rule["value"]
             actual_value = data.get(column)
+
+            # Resolve expected value if it's a column reference (int)
+            expected_value = rule["value"]
+            if isinstance(expected_value, int) and expected_value in data:
+                 expected_value = data.get(expected_value)
 
             if actual_value is None:
                 return {"passed": False, "message": f"Column {column}C is empty"}
