@@ -592,12 +592,12 @@
         // Charts
         const c1 = new Chart(document.getElementById('volChart'), {
             type: 'line',
-            data: { labels: ['10m', '8m', '6m', '4m', '2m', 'Now'], datasets: [{ label: 'Volume', data: [12, 19, 3, 5, 2, 3], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.4 }] },
+            data: { labels: ['10s', '8s', '6s', '4s', '2s', 'Now'], datasets: [{ label: 'Total Files', data: [0, 0, 0, 0, 0, 0], borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.4 }] },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { color: '#2a3441' } } } }
         });
         const c2 = new Chart(document.getElementById('mixChart'), {
             type: 'doughnut',
-            data: { labels: ['Valid', 'Invalid'], datasets: [{ data: [90, 10], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }] },
+            data: { labels: ['Valid', 'Invalid'], datasets: [{ data: [1, 0], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }] },
             options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } } }
         });
 
@@ -608,6 +608,17 @@
                 document.getElementById('val-processed').innerText = s.files_processed.toLocaleString();
                 document.getElementById('val-rate').innerText = s.success_rate + "%";
                 document.getElementById('val-alerts').innerText = s.active_alerts;
+
+                // Update Mix Chart (Pie)
+                c2.data.datasets[0].data = [s.chart_data.valid, s.chart_data.invalid];
+                c2.update();
+
+                // Update Volume Chart (Line) - Simulator Style
+                // Shift old data, add new point (Total Files)
+                const newData = s.files_processed;
+                c1.data.datasets[0].data.shift();
+                c1.data.datasets[0].data.push(newData);
+                c1.update();
 
                 // Logs
                 const l = await (await fetch(`${API}/logs`)).json();
