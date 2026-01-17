@@ -1,96 +1,73 @@
 from src.validator.config_manager import ConfigManager
 from src.validator.engine import ValidationEngine
-import csv
+from src.validator.data_generator import DataGenerator
 import os
 import time
-import random
-
-def generate_wide_data(filename, rows, cols, valid=True):
-    print(f"Generatng {filename} with {rows} rows and {cols} columns...")
-    start_time = time.time()
-    
-    with open(filename, "w", newline="") as f:
-        writer = csv.writer(f)
-        for i in range(rows):
-            row = []
-            for c in range(cols):
-                # Generate varied data
-                if c == 0:
-                    row.append(f"ID_{i}") # 1C: ID
-                elif c == 99: 
-                    # 100C: Random int
-                    row.append(random.randint(100, 1000))
-                elif c == 149:
-                    # 150C: Status (Last col for 150-col file)
-                    if valid:
-                        row.append("ACTIVE")
-                    else:
-                        # Inject error in last row
-                        row.append("ACTIVE" if i < rows-1 else "INVALID")
-                else:
-                    # Random numeric filler
-                    row.append(c * 10 + i)
-            writer.writerow(row)
-            
-    print(f"Generated in {time.time() - start_time:.2f}s")
 
 def run_stress_test():
-    print("=== HIGH DIMENSIONALITY STRESS TEST ===\n")
+    print("=== FINANCIAL DATA STRESS TEST (DYNAMIC) ===\n")
     
-    config_file = "stress_config.json"
+    config_file = "financial_stress_config.json"
     if os.path.exists(config_file):
         os.remove(config_file)
         
     cm = ConfigManager(config_file)
     
-    # --- SCENARIO 1: Deep Column Check ---
-    # File: 150 Columns
-    # Rules: Check 150th column type and value
-    print("[Config] Scenario 1: Checking Column 150 (Deep Column)")
-    cm.add_ruleset("deep_col_rules", [
-        "150C REQUIRED", 
-        "150C IS ALPHANUM",
-        "150C = \"ACTIVE\"" 
+    # Define Financial Rules
+    print("[Config] Setting up Financial Rules")
+    cm.add_ruleset("financial_rules", [
+        "1C REQUIRED",
+        "1C IS ALPHANUM",
+        "1C STARTS_WITH \"TXN\"",
+        "3C MATCHES \"(USD|EUR|GBP|INR|JPY)\"",
+        "4C IS NUMERIC",
+        "4C > 0"
     ])
-    cm.add_route(r"WideData-150-.*\.txt", "deep_col_rules")
+    # Router matches timestamped files: Financial-Valid-2024....txt
+    cm.add_route(r"Financial-.*\.txt", "financial_rules")
     
-    # --- SCENARIO 2: Cross-Column Arithmetic ---
-    # File: 120 Columns
-    # Rules: Check if Col 20 > Col 10 (Simulated consistency check)
-    # Note: 50C > 40C is now supported by our DSL update
-    print("[Config] Scenario 2: Relative checks (50C > 40C)")
-    cm.add_ruleset("relative_rules", [
-        "50C > 40C",
-        "1C STARTS_WITH \"ID_\""
-    ])
-    cm.add_route(r"WideData-Rel-.*\.txt", "relative_rules")
+    # Inject System Config (Alerts)
+    system_config = {
+        "email_recipients": ["202117B3762@wilp.bits-pilani.ac.in", "sriramramanathan9544@gmail.com"],
+        "smtp_config": {
+            "server": "smtp.gmail.com",
+            "port": 587,
+            "sender_email": "sriramramanathan9544@gmail.com",
+            "sender_password": "fheq hgrz ipfx yewp"
+        },
+        "servicenow": {
+            "instance_url": "https://dev275610.service-now.com/",
+            "username": "admin",
+            "password": "a1zu9UsSJ%M@"
+        }
+    }
+    cm.set_system_config(system_config)
 
-    # Generate Data
-    file_150 = "WideData-150-Valid.txt"
-    # 2000 rows, 150 columns
-    generate_wide_data(file_150, 2000, 150, valid=True)
+    # 2. Generate DYNAMIC Data
+    gen = DataGenerator(output_dir=".")
     
-    file_rel = "WideData-Rel-Mixed.txt"
-    # 2000 rows, 120 columns
-    generate_wide_data(file_rel, 2000, 120, valid=True)
+    # Valid Batch (5000 rows)
+    file_valid = gen.generate_financial_batch(5000, valid=True)
+    
+    # Invalid Batch (5000 rows)
+    file_invalid = gen.generate_financial_batch(5000, valid=False)
 
-    # Run Engine
+    # 3. Run Engine
     print("\n[Execution] Starting Validation Engine...")
     engine = ValidationEngine(config_file)
     
     t0 = time.time()
-    engine.process_file(os.path.abspath(file_150))
+    engine.process_file(os.path.abspath(file_valid))
     t1 = time.time()
-    print(f"Processed 150-col file in {t1-t0:.2f}s")
+    print(f"Processed Valid File {file_valid} in {t1-t0:.2f}s")
     
-    engine.process_file(os.path.abspath(file_rel))
+    engine.process_file(os.path.abspath(file_invalid))
     t2 = time.time()
-    print(f"Processed 120-col file in {t2-t1:.2f}s")
+    print(f"Processed Invalid File {file_invalid} in {t2-t1:.2f}s")
     
-    # Cleanup
-    # os.remove(file_150)
-    # os.remove(file_rel)
-    # os.remove(config_file)
+    # Cleanup config only (keep data to show dynamic names)
+    if os.path.exists(config_file):
+        os.remove(config_file)
 
 if __name__ == "__main__":
     run_stress_test()

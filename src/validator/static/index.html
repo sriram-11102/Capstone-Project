@@ -4,22 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validator | Command Center</title>
+    <title>Validator | Operations</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
     <style>
         :root {
-            --bg: #09090b;
-            --surface: #18181b;
-            --surface-hover: #27272a;
-            --border: #27272a;
-            --primary: #6366f1;
-            --primary-glow: rgba(99, 102, 241, 0.4);
-            --accent: #8b5cf6;
-            --text: #fafafa;
-            --text-muted: #a1a1aa;
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-hover: #334155;
+            --border: #334155;
+            --primary: #3b82f6;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
             --success: #10b981;
             --error: #ef4444;
             --warning: #f59e0b;
@@ -34,706 +32,465 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            font-family: 'Outfit', sans-serif;
-            min-height: 100vh;
-            display: grid;
-            grid-template-columns: 280px 1fr;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            height: 100vh;
             overflow: hidden;
-            /* Main scroll handled by main element */
         }
 
         /* Sidebar */
         aside {
+            width: 260px;
             background: var(--surface);
             border-right: 1px solid var(--border);
-            padding: 2rem;
             display: flex;
             flex-direction: column;
+            padding: 1.5rem;
             gap: 2rem;
-            height: 100vh;
         }
 
         .logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--accent));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.5px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            cursor: pointer;
         }
 
-        .logo::before {
-            content: '';
-            display: block;
-            width: 12px;
-            height: 12px;
-            background: var(--primary);
-            border-radius: 50%;
-            box-shadow: 0 0 15px var(--primary-glow);
-            animation: pulse 2s infinite;
+        .logo span {
+            color: var(--primary);
+        }
+
+        nav {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         nav button {
-            width: 100%;
-            padding: 1rem;
-            background: transparent;
-            border: 1px solid transparent;
-            color: var(--text-muted);
             text-align: left;
-            border-radius: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+        }
+
+        nav button:hover {
+            background: var(--surface-hover);
+            color: var(--text);
         }
 
         nav button.active {
-            background: var(--surface-hover);
-            color: var(--text);
-            border-color: var(--border);
+            background: var(--primary);
+            color: white;
         }
 
-        nav button:hover:not(.active) {
-            color: var(--text);
-        }
-
-        .sys-status {
-            margin-top: auto;
-            padding: 1rem;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            color: var(--success);
-            border-radius: 12px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Main Content */
+        /* Main */
         main {
+            flex: 1;
             padding: 2rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
             overflow-y: auto;
-            max-height: 100vh;
             scroll-behavior: smooth;
         }
 
-        header {
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1rem;
+            margin-bottom: 2rem;
         }
 
         h1 {
-            font-size: 2rem;
-            font-weight: 700;
+            font-size: 1.5rem;
+            font-weight: 600;
         }
 
-        .subtitle {
-            color: var(--text-muted);
-        }
-
-        /* LIVE STATUS BAR */
-        .live-status-bar {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        .status-card {
+        .refresh-btn {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .status-card.processing::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: var(--warning);
-        }
-
-        .status-card.incident::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: var(--error);
-        }
-
-        .sc-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-
-        .sc-value {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 1.1rem;
             color: var(--text);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
         }
 
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--warning);
-            border-radius: 50%;
-            animation: blink 1s infinite;
+        .refresh-btn:hover {
+            background: var(--surface-hover);
         }
 
-        /* KPI Grid */
-        .kpi-grid {
+        /* Grid */
+        .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .cols-4 {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .cols-2 {
+            grid-template-columns: 2fr 1fr;
         }
 
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 16px;
+            border-radius: 12px;
             padding: 1.5rem;
-            position: relative;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        .kpi-label {
-            font-size: 0.875rem;
+        .label {
+            font-size: 0.75rem;
+            font-weight: 600;
             color: var(--text-muted);
+            text-transform: uppercase;
             margin-bottom: 0.5rem;
         }
 
-        .kpi-value {
-            font-size: 2.5rem;
+        .value {
+            font-size: 2rem;
             font-weight: 700;
-            color: var(--text);
         }
 
-        .kpi-trend {
+        .sub-value {
             font-size: 0.875rem;
-            margin-top: 0.5rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+
+        /* Live Feed specific */
+        .file-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: var(--primary);
             display: flex;
             align-items: center;
-            gap: 0.25rem;
+            gap: 0.5rem;
         }
 
-        .trend-up {
-            color: var(--success);
-        }
-
-        .trend-down {
+        .incident-display {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
             color: var(--error);
         }
 
-        /* Charts Section */
-        .analytics-row {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
-            min-height: 350px;
-        }
-
-        .chart-container {
-            width: 100%;
-            height: 100%;
-            min-height: 300px;
-            position: relative;
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
         }
 
         /* Tables */
-        .table-container {
-            width: 100%;
-            overflow-x: auto;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            font-size: 0.875rem;
         }
 
         th {
             text-align: left;
-            padding: 1rem;
-            color: var(--text-muted);
+            padding: 0.75rem;
             border-bottom: 1px solid var(--border);
-            font-weight: 600;
+            color: var(--text-muted);
+            font-weight: 500;
         }
 
         td {
-            padding: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border);
         }
 
-        tr:hover {
-            background: var(--surface-hover);
-            cursor: pointer;
+        tr:last-child td {
+            border-bottom: none;
         }
 
         .badge {
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
             font-size: 0.75rem;
-            font-weight: bold;
+            font-weight: 600;
         }
 
-        .badge-inc {
-            background: rgba(239, 68, 68, 0.2);
-            color: var(--error);
-        }
-
-        .badge-ok {
+        .bg-green {
             background: rgba(16, 185, 129, 0.2);
             color: var(--success);
         }
 
-        /* Modal */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        .modal-overlay.open {
-            display: flex;
-            opacity: 1;
-        }
-
-        .modal {
-            background: var(--bg);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            width: 500px;
-            max-width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            transform: scale(0.95);
-            transition: transform 0.2s;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-overlay.open .modal {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .rule-item {
-            background: var(--surface);
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            border-radius: 8px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            border-left: 3px solid var(--primary);
-        }
-
-        /* Logs */
-        .terminal {
-            background: #0d0d0d;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            padding: 1.5rem;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
-            max-height: 400px;
-            overflow-y: auto;
-            scroll-behavior: smooth;
-        }
-
-        .log-entry {
-            margin-bottom: 0.5rem;
-            display: flex;
-            gap: 1rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            padding-bottom: 0.25rem;
-        }
-
-        .log-time {
-            color: var(--text-muted);
-            opacity: 0.5;
-            min-width: 150px;
-        }
-
-        .log-msg {
-            color: #e5e5e5;
-        }
-
-        .log-entry.error .log-msg {
+        .bg-red {
+            background: rgba(239, 68, 68, 0.2);
             color: var(--error);
         }
 
-        .log-entry.success .log-msg {
-            color: var(--success);
+        /* Terminal */
+        .terminal {
+            background: #000;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+        .log-entry {
+            display: flex;
+            gap: 1rem;
+            opacity: 0.8;
         }
 
-        ::-webkit-scrollbar-track {
-            background: var(--bg);
+        .log-time {
+            color: #64748b;
+            min-width: 140px;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: var(--surface-hover);
-            border-radius: 4px;
+        .log-msg {
+            color: #e2e8f0;
         }
 
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
-            }
+        .c-err {
+            color: #ef4444;
+        }
 
-            70% {
-                box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
-            }
-
-            100% {
-                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
-            }
+        .c-ok {
+            color: #10b981;
         }
 
         @keyframes blink {
-
-            0%,
-            100% {
-                opacity: 1;
-            }
-
             50% {
-                opacity: 0.5;
+                opacity: 0.4;
             }
+        }
+
+        /* Modal */
+        .modal-bg {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-content {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+            border-radius: 12px;
         }
     </style>
 </head>
 
 <body>
     <aside>
-        <div class="logo">VALIDATOR</div>
+        <div class="logo"><span>///</span> VALIDATOR</div>
         <nav>
-            <button class="active" onclick="scrollToId('overview')">Overview</button>
-            <button onclick="scrollToId('live-feed')">System State</button>
-            <button onclick="scrollToId('incidents')">Recent Incidents</button>
-            <button onclick="scrollToId('rules')">Active Rulesets</button>
+            <button class="active" onclick="scrollSection('overview')">Dashboard</button>
+            <button onclick="scrollSection('live')">Live Monitor</button>
+            <button onclick="scrollSection('incidents')">Incidents</button>
+            <button onclick="scrollSection('rules')">Rulesets</button>
         </nav>
-        <div class="sys-status" id="sys-status">SYSTEM ONLINE</div>
     </aside>
 
-    <main id="main-scroll">
-        <header id="overview">
-            <div>
-                <h1>Command Center</h1>
-                <div class="subtitle">Real-Time Validation Operations</div>
-            </div>
-            <button onclick="updateDashboard()"
-                style="padding: 0.75rem 1.5rem; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">Refresh
-                Data</button>
-        </header>
+    <main>
+        <div class="header" id="overview">
+            <h1>System Overview</h1>
+            <button class="refresh-btn" onclick="updateData()">Refresh</button>
+        </div>
 
-        <!-- LIVE STATE ROW (NEW) -->
-        <div class="live-status-bar" id="live-feed">
-            <div class="status-card processing">
-                <div class="sc-label">Current File Processing</div>
-                <div class="sc-value" id="current-file">
-                    <span style="color: var(--text-muted)">Idle</span>
+        <!-- KPI Grid -->
+        <div class="grid cols-4">
+            <div class="card">
+                <div class="label">Files Processed</div>
+                <div class="value" id="val-processed">--</div>
+                <div class="sub-value">Total transactions</div>
+            </div>
+            <div class="card">
+                <div class="label">Success Rate</div>
+                <div class="value" id="val-rate">--%</div>
+                <div class="sub-value">Validation Pass Ratio</div>
+            </div>
+            <div class="card">
+                <div class="label">Active Incidents</div>
+                <div class="value" style="color: var(--error)" id="val-alerts">--</div>
+                <div class="sub-value">Requires Attention</div>
+            </div>
+        </div>
+
+        <!-- Live Monitor -->
+        <div class="grid cols-2" id="live">
+            <div class="card">
+                <div class="label">Live File Tracker</div>
+                <div id="file-tracker" class="file-display">
+                    <span style="color: var(--text-muted)">Waiting for data...</span>
                 </div>
             </div>
-            <div class="status-card incident">
-                <div class="sc-label">Latest Incident Created</div>
-                <div class="sc-value" id="latest-incident">
+            <div class="card">
+                <div class="label">Latest Incident</div>
+                <div id="incident-tracker" class="incident-display">
                     <span style="color: var(--text-muted)">--</span>
                 </div>
             </div>
         </div>
 
-        <!-- KPIS -->
-        <div class="kpi-grid">
-            <div class="card">
-                <div class="kpi-label">Total Transactions</div>
-                <div class="kpi-value" id="kpi-processed">--</div>
-                <div class="kpi-trend trend-up">▲ Dynamic</div>
-            </div>
-            <div class="card">
-                <div class="kpi-label">Active Alerts</div>
-                <div class="kpi-value" style="color: var(--error)" id="kpi-alerts">--</div>
-                <div class="kpi-trend trend-down">Pending Action</div>
-            </div>
-        </div>
-
         <!-- Charts -->
-        <div class="analytics-row">
-            <div class="card">
-                <div class="kpi-label" style="margin-bottom: 1rem">Traffic Volume</div>
-                <div class="chart-container">
-                    <canvas id="volumeChart"></canvas>
-                </div>
+        <div class="grid cols-2" style="height: 300px;">
+            <div class="card" style="position: relative;">
+                <canvas id="volChart"></canvas>
             </div>
-            <div class="card">
-                <div class="kpi-label" style="margin-bottom: 1rem">Validation Mix</div>
-                <div class="chart-container">
-                    <canvas id="mixChart"></canvas>
-                </div>
+            <div class="card" style="position: relative;">
+                <canvas id="mixChart"></canvas>
             </div>
         </div>
 
-        <!-- Recent Alerts Table -->
-        <div class="card" id="incidents">
-            <div class="kpi-label" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text)">Incident History
-            </div>
-            <div class="table-container">
-                <table id="alert-table">
-                    <thead>
-                        <tr>
-                            <th>Time</th>
-                            <th>Severity</th>
-                            <th>Event</th>
-                            <th>Details</th>
-                        </tr>
-                    </thead>
-                    <tbody><!-- Populated via JS --></tbody>
-                </table>
-            </div>
+        <!-- Incidents Table -->
+        <div class="card" id="incidents" style="margin-bottom: 2rem;">
+            <div class="label" style="font-size: 1rem; margin-bottom: 1rem;">Recent Incident Log</div>
+            <table id="tbl-incidents">
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>Level</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
 
-        <!-- Rulesets -->
-        <div class="card" id="rules">
-            <div class="kpi-label" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text)">Active Rulesets
-                (Click to Inspect)</div>
-            <div class="table-container">
-                <table id="ruleset-table">
-                    <thead>
-                        <tr>
-                            <th>Ruleset Name</th>
-                            <th>Rule Count</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody><!-- Populated via JS --></tbody>
-                </table>
-            </div>
+        <!-- Rules Table -->
+        <div class="card" id="rules" style="margin-bottom: 2rem;">
+            <div class="label" style="font-size: 1rem; margin-bottom: 1rem;">Configuration</div>
+            <table id="tbl-rules">
+                <thead>
+                    <tr>
+                        <th>Ruleset</th>
+                        <th>Count</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
 
-        <!-- Logs -->
-        <div class="card">
-            <div class="kpi-label" style="margin-bottom: 1rem">Raw System Terminal</div>
-            <div class="terminal" id="terminal-feed">
-                <!-- Logs will be injected here -->
-            </div>
-        </div>
+        <!-- Terminal -->
+        <div class="terminal" id="terminal"></div>
+
     </main>
 
     <!-- Modal -->
-    <div class="modal-overlay" id="rule-modal" onclick="closeModal(event)">
-        <div class="modal">
-            <div class="modal-header">
-                <h3 id="modal-title">Ruleset Details</h3>
-                <button onclick="closeModal()"
-                    style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
-            </div>
-            <div class="modal-body" id="modal-content">
-                <!-- Rules injected here -->
-            </div>
-        </div>
+    <div class="modal-bg" id="modal" onclick="if(event.target===this)this.style.display='none'">
+        <div class="modal-content" id="modal-body"></div>
     </div>
 
     <script>
-        const API_BASE = window.location.origin;
+        const API = window.location.origin;
 
-        // --- Charts ---
-        const ctxVol = document.getElementById('volumeChart').getContext('2d');
-        const volChart = new Chart(ctxVol, {
+        // Charts
+        const c1 = new Chart(document.getElementById('volChart'), {
             type: 'line',
-            data: {
-                labels: ['1m', '2m', '3m', '4m', '5m'],
-                datasets: [{
-                    label: 'Processed', data: [100, 300, 150, 400, 200],
-                    borderColor: '#6366f1', backgroundColor: 'rgba(99, 102, 241, 0.1)', fill: true, tension: 0.4
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { grid: { color: '#27272a' } } } }
+            data: { labels: ['10m', '8m', '6m', '4m', '2m', 'Now'], datasets: [{ label: 'Volume', data: [12, 19, 3, 5, 2, 3], borderColor: '#3b82f6', tension: 0.4 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
         });
-
-        const ctxMix = document.getElementById('mixChart').getContext('2d');
-        const mixChart = new Chart(ctxMix, {
+        const c2 = new Chart(document.getElementById('mixChart'), {
             type: 'doughnut',
-            data: {
-                labels: ['Valid', 'Invalid'],
-                datasets: [{ data: [90, 10], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right' } } }
+            data: { labels: ['Valid', 'Invalid'], datasets: [{ data: [90, 10], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }] },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '75%', plugins: { legend: { position: 'right' } } }
         });
 
-        // --- Logic ---
-
-        // State tracking
-        let currentFile = "";
-        let lastIncident = "";
-
-        function scrollToId(id) {
-            const el = document.getElementById(id);
-            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            // Sidebar active state
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-        }
-
-        async function updateDashboard() {
+        async function updateData() {
             try {
-                // 1. Stats
-                const resStats = await fetch(`${API_BASE}/stats`);
-                const stats = await resStats.json();
-                document.getElementById('kpi-processed').innerText = stats.files_processed.toLocaleString();
-                document.getElementById('kpi-alerts').innerText = stats.active_alerts;
+                // Stats
+                const s = await (await fetch(`${API}/stats`)).json();
+                document.getElementById('val-processed').innerText = s.files_processed.toLocaleString();
+                document.getElementById('val-rate').innerText = s.success_rate;
+                document.getElementById('val-alerts').innerText = s.active_alerts;
 
-                // 2. Logs & Parsing
-                const resLogs = await fetch(`${API_BASE}/logs`);
-                const logData = await resLogs.json();
-                // Logs come oldest -> newest (tail), but usually we want newest first in UI
-                // API implementation: returns lines[-50:]. So index 0 is oldest of that chunk.
-                const logs = logData.logs.slice().reverse();
+                // Logs
+                const l = await (await fetch(`${API}/logs`)).json();
+                const logs = l.logs.slice().reverse();
 
-                const terminal = document.getElementById('terminal-feed');
-                terminal.innerHTML = '';
-                const alertTbody = document.querySelector('#alert-table tbody');
-                alertTbody.innerHTML = '';
+                const term = document.getElementById('terminal');
+                const tblInc = document.querySelector('#tbl-incidents tbody');
+                term.innerHTML = ''; tblInc.innerHTML = '';
+
+                let currentFile = null;
 
                 logs.forEach(line => {
-                    // PARSING LOGIC
-
-                    // Track Current File
-                    if (line.includes('Processing file:')) {
-                        // Extract filename. Format: "... Processing file: F:\Path\To\File.txt"
-                        const parts = line.split('\\');
-                        const fname = parts[parts.length - 1].trim();
-                        // Only update if it's the *most recent* (since we iterate reverse, first one we see is newest)
-                        if (!currentFile || line > currentFile) {
-                            currentFile = fname;
-                            document.getElementById('current-file').innerHTML = `<div class="pulse-dot"></div> ${fname}`;
-                        }
+                    // Track Logic
+                    if (line.includes('Processing file:') && !currentFile) {
+                        const f = line.split('\\').pop();
+                        document.getElementById('file-tracker').innerHTML = `<div class="pulse"></div> Processing: ${f}`;
+                        currentFile = f;
+                    }
+                    if (line.includes('Incident created:')) {
+                        document.getElementById('incident-tracker').innerText = line.split(':').pop().trim();
                     }
 
-                    // Track Incidents
-                    if (line.includes('Incident created successfully:')) {
-                        // Format: "... Incident created successfully: INC0010004"
-                        const parts = line.split(':');
-                        const incId = parts[parts.length - 1].trim();
-                        lastIncident = incId;
-                        document.getElementById('latest-incident').innerHTML = `<span style="color: var(--error)">${incId}</span>`;
-                    }
+                    // Tables
+                    const t = line.substring(0, 19);
+                    const m = line.substring(20);
 
-                    // TERMINAL RENDER
-                    const row = document.createElement('div');
-                    row.className = 'log-entry';
-                    const time = line.substring(0, 19);
-                    const msg = line.substring(20);
-
-                    if (line.includes('ERROR') || line.includes('failed')) row.classList.add('error');
-                    else if (line.includes('[EMAIL]') || line.includes('[SERVICENOW]') || line.includes('successful')) row.classList.add('success');
-
-                    row.innerHTML = `<span class="log-time">${time}</span><span class="log-msg">${msg}</span>`;
-                    terminal.appendChild(row);
-
-                    // ALERTS TABLE RENDER
                     if (line.includes('ERROR') || line.includes('Incident') || line.includes('EMAIL')) {
                         const tr = document.createElement('tr');
-                        let type = "INFO";
-                        let badge = "badge-ok";
-
-                        if (line.includes('ERROR')) { type = "FAILURE"; badge = "badge-inc"; }
-                        else if (line.includes('Incident')) { type = "TICKET"; badge = "badge-inc"; }
-                        else if (line.includes('EMAIL')) { type = "ALERT"; badge = "badge-ok"; }
-
-                        tr.innerHTML = `<td>${time}</td><td><span class="badge ${badge}">${type}</span></td><td>System Event</td><td>${msg}</td>`;
-                        alertTbody.appendChild(tr);
+                        const badge = line.includes('ERROR') ? 'bg-red' : 'bg-green';
+                        const txt = line.includes('ERROR') ? 'FAILURE' : 'ALERT';
+                        tr.innerHTML = `<td>${t}</td><td><span class="badge ${badge}">${txt}</span></td><td>${m}</td>`;
+                        tblInc.appendChild(tr);
                     }
+
+                    // Terminal
+                    const d = document.createElement('div');
+                    d.className = 'log-entry';
+                    if (line.includes('ERROR')) d.classList.add('c-err');
+                    else if (line.includes('EMAIL') || line.includes('successful')) d.classList.add('c-ok');
+                    d.innerHTML = `<span class="log-time">${t}</span><span class="log-msg">${m}</span>`;
+                    term.appendChild(d);
                 });
 
-                // 3. Rulesets
-                const resRules = await fetch(`${API_BASE}/rulesets`);
-                const rules = await resRules.json();
-                const rulesTbody = document.querySelector('#ruleset-table tbody');
-                rulesTbody.innerHTML = '';
-                Object.keys(rules).forEach(name => {
+                // Rules
+                const r = await (await fetch(`${API}/rulesets`)).json();
+                const tblRules = document.querySelector('#tbl-rules tbody');
+                tblRules.innerHTML = '';
+                Object.keys(r).forEach(k => {
                     const tr = document.createElement('tr');
-                    tr.onclick = () => showRuleset(name, rules[name]);
-                    tr.innerHTML = `<td><span style="font-weight:700; color:var(--primary)">${name}</span></td><td>${rules[name].length} Rules</td><td><span class="badge badge-ok">Active</span></td>`;
-                    rulesTbody.appendChild(tr);
+                    tr.innerHTML = `<td>${k}</td><td>${r[k].length}</td><td><button class="badge bg-green" onclick='showRule("${k}", ${JSON.stringify(r[k])})'>View</button></td>`;
+                    tblRules.appendChild(tr);
                 });
 
             } catch (e) { console.error(e); }
         }
 
-        // --- Modals ---
-        function showRuleset(name, rules) {
-            document.getElementById('modal-title').innerText = name;
-            const content = document.getElementById('modal-content');
-            content.innerHTML = rules.map(r => `<div class="rule-item">${r}</div>`).join('');
-            document.getElementById('rule-modal').classList.add('open');
-        }
-        function closeModal(e) {
-            if (!e || e.target.id === 'rule-modal' || !e.target.closest('.modal')) {
-                document.getElementById('rule-modal').classList.remove('open');
-            }
+        function showRule(name, rules) {
+            document.getElementById('modal-body').innerHTML = `<h3>${name}</h3><br>` + rules.map(x => `<div>• ${x}</div>`).join('');
+            document.getElementById('modal').style.display = 'flex';
         }
 
-        setInterval(updateDashboard, 1000); // 1s refresh for "Real Time" feel
-        updateDashboard();
+        function scrollSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        setInterval(updateData, 2000);
+        updateData();
     </script>
 </body>
 
