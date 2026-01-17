@@ -12,14 +12,11 @@ timeout /t 5 /nobreak >nul
 echo [2/3] Opening Dashboard...
 start http://localhost:8000/dashboard
 
-echo [3/3] Running Financial Stress Test Simulation...
-start "Simulation" cmd /k "python stress_test.py"
+echo [LAUNCHER] Starting File Watcher (Monitor)...
+start "File Watcher" cmd /k "python watcher.py"
 
+echo [SUCCESS] System is live!
+echo - API/Dashboard: http://localhost:8000/dashboard
+echo - Input Folder : input/
 echo.
-echo ===================================================
-echo   System Running!
-echo   - Check the Dashboard API window for backend logs
-echo   - Check the Simulation window for test progress
-echo   - Watch the Dashboard in your browser
-echo ===================================================
 pause

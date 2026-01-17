@@ -1,22 +1,46 @@
 {
     "version": "1.0",
-    "last_updated": "2026-01-17T13:44:59.085609",
+    "last_updated": "2026-01-17T15:40:00.000000",
     "routes": [
         {
-            "pattern": "API-Test-.*\\.csv",
-            "ruleset": "api_test_rules",
+            "pattern": "Financial-.*\\.txt",
+            "ruleset": "financial_rules",
             "priority": 100
         },
         {
-            "pattern": "API-Test-.*\\.txt",
-            "ruleset": "api_test_rules",
-            "priority": 100
+            "pattern": ".*\\.csv",
+            "ruleset": "default_rules",
+            "priority": 10
         }
     ],
     "rulesets": {
-        "api_test_rules": [
+        "financial_rules": [
             "1C REQUIRED",
-            "2C > 50"
+            "1C IS ALPHANUM",
+            "1C STARTS_WITH \"TXN\"",
+            "3C MATCHES \"(USD|EUR|GBP|INR|JPY)\"",
+            "4C IS NUMERIC",
+            "4C > 0"
+        ],
+        "default_rules": [
+            "1C REQUIRED"
         ]
+    },
+    "system_config": {
+        "email_recipients": [
+            "202117B3762@wilp.bits-pilani.ac.in",
+            "sriramramanathan9544@gmail.com"
+        ],
+        "smtp_config": {
+            "server": "smtp.gmail.com",
+            "port": 587,
+            "sender_email": "sriramramanathan9544@gmail.com",
+            "sender_password": "fheq hgrz ipfx yewp"
+        },
+        "servicenow": {
+            "instance_url": "https://dev275610.service-now.com/",
+            "username": "admin",
+            "password": "a1zu9UsSJ%M@"
+        }
     }
 }

@@ -12,38 +12,43 @@ A dynamic, rule-driven file validation system designed to automate compliance mo
 
 ## Quick Start 🚀
 
-### 1. One-Click Launch (Recommended)
-Double-click **`run.bat`** (Windows) to automatically:
-1.  Start the API & Dashboard.
-2.  Launch the Operations Dashboard in your browser.
-3.  Run the **Financial Stress Test** simulation.
+## Quick Start 🚀
 
-### 2. Manual Execution
-**Start the Dashboard/API:**
+### 1. One-Click Launch
+Double-click **`run.bat`** (Windows) to:
+1.  Start the API & Dashboard.
+2.  Start the **File Watcher**.
+3.  Open the Dashboard.
+
+### 2. How to Use
+1.  Drop your data files (`.txt` or `.csv`) into the **`input/`** folder.
+2.  The system automatically detects, processes, and validates them.
+3.  **Valid files** move to `processed/`.
+4.  **Invalid files** move to `rejected/` (and trigger alerts).
+
+### 3. Manual Execution
+**Start Backend:**
 ```bash
 uvicorn src.validator.api:app --reload
 ```
-*Access: [http://localhost:8000/dashboard](http://localhost:8000/dashboard)*
-
-**Run Validation Workflow:**
+**Start Watcher:**
 ```bash
-python stress_test.py
+python watcher.py
 ```
-*This will generate unique timestamped financial data and validate it in real-time.*
 
 ## Project Structure
 *   `src/validator/`: Core logic (Engine, Rules, Router, Alerter).
-*   `src/validator/static/`: Premium V5 Dashboard (HTML/CSS/JS).
-*   `src/validator/data_generator.py`: Dynamic test data generator.
-*   `stress_test.py`: Main simulation script.
+*   `src/validator/static/`: Premium V5 Dashboard.
+*   `watcher.py`: Real-time file monitor.
 *   `run.bat`: Launcher script.
 *   `config.json`: Production rules configuration.
 
 ## Features
-*   **Dynamic Data**: Generates fresh, randomized financial datasets on every run.
-*   **Real-Time Dashboard**: "Command Center" UI with live file tracking, charts, and incident history.
-*   **Smart Alerts**: Intelligent email and ServiceNow integration.
-*   **Custom DSL**: Define business rules in simple English (e.g., `1C REQUIRED`).
+*   **Real-Time Monitoring**: Watches `input/` folder for new files.
+*   **Automatic Routing**: Sorts files into `processed/` or `rejected/` based on validation.
+*   **Command Center UI**: Live tracking of processing status.
+*   **Smart Alerts**: Email & ServiceNow integration.
+*   **Custom DSL**: Define business rules in `config.json`.
 
 ## Configuration
 Set environment variables for alerting:

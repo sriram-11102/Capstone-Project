@@ -98,5 +98,7 @@ class ValidationEngine:
         if all_failures:
             logger.error(f"Validation failed with {len(all_failures)} errors.")
             self.alerter.trigger_alert(filepath, ruleset_name, all_failures)
+            return False # FAILED
         else:
             logger.info("Validation successful.")
+            return True # PASSED

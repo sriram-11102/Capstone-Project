@@ -6,7 +6,7 @@ This project successfully implements a **Real-Time Data Validation System** desi
 ## Key Features Delivered
 1.  **Validation Engine**: A Python-based engine that parses custom logical rules (e.g., `1C REQUIRED`, `4C > 100`) and applies them to large datasets.
 2.  **Configuration Management**: Rules and file routing are managed via `config.json` or a REST API, allowing hot-swapping without restarts.
-3.  **Dynamic Data Generation**: A stress-testing module that creates unique, randomized financial datasets on demand.
+3.  **Real-Time File Monitoring**: A `watcher.py` service that actively monitors input directories and processes files instantly.
 4.  **Operations Dashboard (V5)**:
     *   **Live Telemetry**: Real-time tracking of files and processing speeds.
     *   **Visual Analytics**: Charts for traffic volume and validation success rates.
@@ -18,7 +18,7 @@ This project successfully implements a **Real-Time Data Validation System** desi
 *   **Engine**: `src/validator/engine.py` (Orchestrates validation).
 *   **API**: `src/validator/api.py` (FastAPI backend).
 *   **Frontend**: `src/validator/static/index.html` (Dark-mode SPA).
-*   **Testing**: `stress_test.py` (End-to-end simulation).
+*   **Watcher**: `watcher.py` (File System Monitor).
 
 ## Performance Verification
 *   **Scale**: Tested with 5,000 to 10,000 rows per file.
@@ -26,4 +26,4 @@ This project successfully implements a **Real-Time Data Validation System** desi
 *   **Reliability**: Successfully detected 100% of injected errors (Currency mismatches, Negative amounts).
 
 ## Conclusion
-The system meets all initial requirements and exceeds expectations with the addition of the dynamic data generator and premium dashboard. It is ready for deployment.
+The system has been successfully transitioned to a production-ready state with active file monitoring and dashboard visualization.
