@@ -85,7 +85,11 @@ def get_stats():
         "files_processed": total,
         "success_rate": rate,
         "active_alerts": count_rejected,
-        "system_status": "OPERATIONAL"
+        "system_status": "OPERATIONAL",
+        "chart_data": {
+            "valid": count_processed,
+            "invalid": count_rejected
+        }
     }
 
 @app.get("/logs")
@@ -160,3 +164,35 @@ def validate_file(request: ValidationRequest, background_tasks: BackgroundTasks)
     # Dispatch to engine
     background_tasks.add_task(validation_engine.process_file, request.filepath)
     return {"message": "Validation scheduled", "filepath": request.filepath}
+
+@app.get("/files/{category}")
+def list_files(category: str):
+    """
+    List files in 'processed' or 'rejected' directories.
+    """
+    if category not in ["processed", "rejected"]:
+        raise HTTPException(status_code=400, detail="Invalid category")
+    
+    target_dir = os.path.join(os.getcwd(), category)
+    if not os.path.exists(target_dir):
+        return {"files": []}
+        
+    try:
+        # Get files with timestamp
+        files = []
+        for f in os.listdir(target_dir):
+            full_path = os.path.join(target_dir, f)
+            if os.path.isfile(full_path):
+                stats = os.stat(full_path)
+                files.append({
+                    "name": f,
+                    "size": stats.st_size,
+                    "modified": stats.st_mtime
+                })
+        
+        # Sort by newest first
+        files.sort(key=lambda x: x["modified"], reverse=True)
+        return {"files": files}
+    except Exception as e:
+        logger.error(f"Error listing files: {e}")
+        return {"files": []}

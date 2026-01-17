@@ -464,6 +464,8 @@
             <button class="active" onclick="scrollSection('overview')">Dashboard</button>
             <button onclick="scrollSection('live')">Live Monitor</button>
             <button onclick="scrollSection('incidents')">Incidents</button>
+            <button onclick="scrollSection('processed')">Files Processed</button>
+            <button onclick="scrollSection('rejected')">Files Rejected</button>
             <button onclick="scrollSection('rules')">Rulesets</button>
         </nav>
         <div style="flex:1"></div>
@@ -570,6 +572,44 @@
                 </div>
             </div>
 
+            <!-- Processed Files Table -->
+            <div class="card" id="processed" style="margin-bottom: 2rem; padding: 0;">
+                <div style="padding: 1.5rem 1.5rem 0.5rem 1.5rem;">
+                    <div class="label" style="color:var(--success)">Processed Files (Valid)</div>
+                </div>
+                <div style="overflow-x: auto; max-height: 500px; overflow-y:auto;">
+                    <table id="tbl-processed">
+                        <thead>
+                            <tr>
+                                <th style="padding-left:1.5rem">Filename</th>
+                                <th>Size</th>
+                                <th>Processed At</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Rejected Files Table -->
+            <div class="card" id="rejected" style="margin-bottom: 2rem; padding: 0;">
+                <div style="padding: 1.5rem 1.5rem 0.5rem 1.5rem;">
+                    <div class="label" style="color:var(--error)">Rejected Files (Invalid)</div>
+                </div>
+                <div style="overflow-x: auto; max-height: 500px; overflow-y:auto;">
+                    <table id="tbl-rejected">
+                        <thead>
+                            <tr>
+                                <th style="padding-left:1.5rem">Filename</th>
+                                <th>Size</th>
+                                <th>Processed At</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
             <!-- Terminal -->
             <div class="terminal" id="terminal"></div>
 
@@ -598,11 +638,36 @@
         const c2 = new Chart(document.getElementById('mixChart'), {
             type: 'doughnut',
             data: { labels: ['Valid', 'Invalid'], datasets: [{ data: [1, 0], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'right', labels: { color: '#94a3b8' } } } }
+            options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { position: 'right', labels: { color: '#94a3b8', boxWidth: 12 } } } }
         });
+
+        async function updateFiles(category, tableId) {
+            try {
+                const res = await (await fetch(`${API}/files/${category}`)).json();
+                const tbody = document.querySelector(`#${tableId} tbody`);
+                tbody.innerHTML = '';
+
+                if (res.files.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#555">No files found</td></tr>';
+                    return;
+                }
+
+                res.files.forEach(f => {
+                    const date = new Date(f.modified * 1000).toLocaleString();
+                    const size = (f.size / 1024).toFixed(1) + ' KB';
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td style="font-family:'JetBrains Mono'">${f.name}</td><td>${size}</td><td style="color:#777">${date}</td>`;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) { console.error(e); }
+        }
 
         async function updateData() {
             try {
+                // Update file lists only if visible (optimization) -> actually just update always for now simplicity
+                if (document.getElementById('processed').style.display !== 'none') updateFiles('processed', 'tbl-processed');
+                if (document.getElementById('rejected').style.display !== 'none') updateFiles('rejected', 'tbl-rejected');
+
                 // Stats
                 const s = await (await fetch(`${API}/stats`)).json();
                 document.getElementById('val-processed').innerText = s.files_processed.toLocaleString();
