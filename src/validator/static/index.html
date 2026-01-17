@@ -638,7 +638,15 @@
         const c2 = new Chart(document.getElementById('mixChart'), {
             type: 'doughnut',
             data: { labels: ['Valid', 'Invalid'], datasets: [{ data: [1, 0], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }] },
-            options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { position: 'right', labels: { color: '#94a3b8', boxWidth: 12 } } } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                layout: { padding: 20 },
+                plugins: {
+                    legend: { position: 'right', labels: { color: '#94a3b8', boxWidth: 12, padding: 20 } }
+                }
+            }
         });
 
         async function updateFiles(category, tableId) {
