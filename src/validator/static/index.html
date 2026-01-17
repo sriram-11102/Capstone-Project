@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validator | Command Center</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;400;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #09090b;
+            --surface: #18181b;
+            --surface-hover: #27272a;
+            --border: #27272a;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --accent: #8b5cf6;
+            --text: #fafafa;
+            --text-muted: #a1a1aa;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        aside {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo::before {
+            content: '';
+            display: block;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 15px var(--primary-glow);
+            animation: pulse 2s infinite;
+        }
+
+        nav button {
+            width: 100%;
+            padding: 1rem;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-muted);
+            text-align: left;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        nav button.active {
+            background: var(--surface-hover);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        nav button:hover:not(.active) {
+            color: var(--text);
+        }
+
+        .sys-status {
+            margin-top: auto;
+            padding: 1rem;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            color: var(--success);
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Main Content */
+        main {
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+        }
+
+        /* KPI Grid */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        }
+
+        .kpi-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .kpi-trend {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .trend-up {
+            color: var(--success);
+        }
+
+        .trend-down {
+            color: var(--error);
+        }
+
+        /* Charts Section */
+        .analytics-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            height: 350px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Terminal Logs */
+        .terminal-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 400px;
+        }
+
+        .terminal {
+            background: #0d0d0d;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            flex: 1;
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            overflow-y: auto;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .log-entry {
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .log-time {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .log-msg {
+            color: #e5e5e5;
+        }
+
+        .log-entry.error .log-msg {
+            color: var(--error);
+            font-weight: bold;
+        }
+
+        .log-entry.success .log-msg {
+            color: var(--success);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--surface-hover);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+            }
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside>
+        <div class="logo">VALIDATOR</div>
+        <nav>
+            <button class="active">Overview</button>
+            <button>Rulesets</button>
+            <button>Alert History</button>
+            <button>Settings</button>
+        </nav>
+        <div class="sys-status" id="sys-status">SYSTEM ONLINE</div>
+    </aside>
+
+    <main>
+        <header>
+            <div>
+                <h1>Command Center</h1>
+                <div class="subtitle">Live System Telemetry</div>
+            </div>
+            <button onclick="fetchLogs()"
+                style="padding: 0.75rem 1.5rem; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">Refresh
+                Data</button>
+        </header>
+
+        <!-- KPIS -->
+        <div class="kpi-grid">
+            <div class="card">
+                <div class="kpi-label">Total Transactions</div>
+                <div class="kpi-value" id="kpi-processed">--</div>
+                <div class="kpi-trend trend-up">▲ +12% vs last hour</div>
+            </div>
+            <div class="card">
+                <div class="kpi-label">Success Rate</div>
+                <div class="kpi-value" id="kpi-success">--%</div>
+                <div class="kpi-trend trend-up">Stable</div>
+            </div>
+            <div class="card">
+                <div class="kpi-label">Active Alerts</div>
+                <div class="kpi-value" style="color: var(--error)" id="kpi-alerts">--</div>
+                <div class="kpi-trend trend-down" style="color: var(--text-muted)">Requires Attention</div>
+            </div>
+            <div class="card">
+                <div class="kpi-label">Rulesets Active</div>
+                <div class="kpi-value" style="color: var(--primary)">4</div>
+                <div class="kpi-trend">Financial, API, Custom</div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="analytics-row">
+            <div class="card">
+                <div class="kpi-label" style="margin-bottom: 1rem">Traffic Volume (Last 24h)</div>
+                <div class="chart-container">
+                    <canvas id="volumeChart"></canvas>
+                </div>
+            </div>
+            <div class="card">
+                <div class="kpi-label" style="margin-bottom: 1rem">Validation Mix</div>
+                <div class="chart-container">
+                    <canvas id="mixChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs -->
+        <div class="terminal-container">
+            <div style="margin-bottom: 0.75rem; font-weight: 600; font-size: 1.1rem;">Live System Logs</div>
+            <div class="terminal" id="terminal-feed">
+                <!-- Logs will be injected here -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const API_BASE = window.location.origin;
+
+        // Initialize Charts
+        const ctxVol = document.getElementById('volumeChart').getContext('2d');
+        const volChart = new Chart(ctxVol, {
+            type: 'line',
+            data: {
+                labels: ['10:00', '11:00', '12:00', '13:00', '14:00'],
+                datasets: [{
+                    label: 'Files Processed',
+                    data: [120, 190, 300, 500, 250],
+                    borderColor: '#6366f1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#27272a' } } } }
+        });
+
+        const ctxMix = document.getElementById('mixChart').getContext('2d');
+        const mixChart = new Chart(ctxMix, {
+            type: 'doughnut',
+            data: {
+                labels: ['Valid', 'Invalid'],
+                datasets: [{
+                    data: [85, 15],
+                    backgroundColor: ['#10b981', '#ef4444'],
+                    borderWidth: 0
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+        });
+
+        async function updateDashboard() {
+            try {
+                // Fetch Stats
+                const resStats = await fetch(`${API_BASE}/stats`);
+                const stats = await resStats.json();
+
+                document.getElementById('kpi-processed').innerText = stats.files_processed.toLocaleString();
+                document.getElementById('kpi-success').innerText = stats.success_rate;
+                document.getElementById('kpi-alerts').innerText = stats.active_alerts;
+
+                // Update Logs
+                const resLogs = await fetch(`${API_BASE}/logs`);
+                const logData = await resLogs.json();
+                const terminal = document.getElementById('terminal-feed');
+                terminal.innerHTML = '';
+
+                logData.logs.reverse().forEach(line => {
+                    const row = document.createElement('div');
+                    row.className = 'log-entry';
+                    if (line.includes('[EMAIL]') || line.includes('[SERVICENOW]')) row.classList.add('success');
+                    if (line.includes('ERROR') || line.includes('failed')) row.classList.add('error');
+
+                    const time = line.substring(0, 19);
+                    const msg = line.substring(20);
+
+                    row.innerHTML = `<span class="log-time">${time}</span><span class="log-msg">${msg}</span>`;
+                    terminal.appendChild(row);
+                });
+
+            } catch (e) { console.error(e); }
+        }
+
+        setInterval(updateDashboard, 2000);
+        updateDashboard();
+    </script>
+</body>
+
+</html>

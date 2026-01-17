@@ -20,13 +20,15 @@ A dynamic, rule-driven file validation system designed to automate compliance mo
    ```bash
    pip install -r requirements.txt
    ```
-2. Run the API:
+2. Run the API (Backend + Dashboard):
    ```bash
    uvicorn src.validator.api:app --reload
    ```
-3. Run Validation Script:
+   **OPEN DASHBOARD:** [http://localhost:8000/dashboard](http://localhost:8000/dashboard)
+
+3. Run Validation Script (To generate activity):
    ```bash
-   python verify_system.py
+   python stress_test.py
    ```
 
 ## Configuration

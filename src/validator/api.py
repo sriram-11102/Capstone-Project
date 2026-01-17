@@ -1,13 +1,44 @@
 from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 from .config_manager import ConfigManager
 from .engine import ValidationEngine
 from .logger import logger
+import os
 
 app = FastAPI(title="File Validation System API", version="1.0")
+
+# Serve Static Files (Dashboard)
+static_dir = os.path.join(os.path.dirname(__file__), "static")
+if not os.path.exists(static_dir):
+    os.makedirs(static_dir)
+
+app.mount("/dashboard", StaticFiles(directory=static_dir, html=True), name="static")
+
 config_manager = ConfigManager()
 validation_engine = ValidationEngine()
+
+@app.get("/stats")
+def get_stats():
+    """Return system statistics (Mocked for demo)"""
+    return {
+        "files_processed": 5000,
+        "success_rate": 98.5,
+        "active_alerts": 3,
+        "system_status": "OPERATIONAL"
+    }
+
+@app.get("/logs")
+def get_logs():
+    """Get last 50 lines of logs"""
+    log_file = "validator.log"
+    if not os.path.exists(log_file):
+        return {"logs": []}
+    
+    with open(log_file, "r") as f:
+        lines = f.readlines()
+        return {"logs": lines[-50:]}
 
 # --- Data Models ---
 class Ruleset(BaseModel):
