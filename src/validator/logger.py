@@ -1,29 +1,38 @@
+"""
+Central Logger
+--------------
+Provides a consistent logging configuration across the application.
+Writes to both Console (Stdout) and File (validator.log).
+"""
+
 import logging
 import sys
 import os
 
 def setup_logger(name: str = "validator", log_file: str = "validator.log", level=logging.INFO):
-    """Function to setup as many loggers as you want"""
+    """
+    Configures and returns a singleton-like logger.
+    """
     
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     
-    # File Handler
+    # 1. File Handler (Rotates logs? No, simple append for now)
     file_handler = logging.FileHandler(log_file)
     file_handler.setFormatter(formatter)
     
-    # Console Handler
+    # 2. Console Handler
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setFormatter(formatter)
     
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
+    logger_instance = logging.getLogger(name)
+    logger_instance.setLevel(level)
     
-    # Avoid adding handlers multiple times if logger is already set up
-    if not logger.handlers:
-        logger.addHandler(file_handler)
-        logger.addHandler(stream_handler)
+    # Check handlers to avoid duplicate lines if called multiple times
+    if not logger_instance.handlers:
+        logger_instance.addHandler(file_handler)
+        logger_instance.addHandler(stream_handler)
         
-    return logger
+    return logger_instance
 
-# Create a default logger instance
+# Global logger instance used by other modules
 logger = setup_logger()

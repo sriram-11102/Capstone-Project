@@ -1,12 +1,17 @@
+"""
+Alert Manager
+-------------
+Handles notifications and incident management integration.
+Supports:
+1. Email (SMTP) - Sends alerts to admins.
+2. ServiceNow - Creates Incident tickets via REST API.
+
+Design Pattern: Strategy Pattern (AlertChannel interface).
+"""
+
 from abc import ABC, abstractmethod
 from typing import List, Dict
 from .logger import logger
-
-class AlertChannel(ABC):
-    @abstractmethod
-    def send_alert(self, subject: str, message: str, details: Dict = None):
-        pass
-
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -14,26 +19,34 @@ import httpx
 import os
 import base64
 
+# --- Abstract Base Strategy ---
+class AlertChannel(ABC):
+    @abstractmethod
+    def send_alert(self, subject: str, message: str, details: Dict = None):
+        """Send an alert through the specific channel implementation."""
+        pass
+
+# --- Email Strategy ---
 class EmailChannel(AlertChannel):
+    """Sends alerts via SMTP."""
+    
     def __init__(self, smtp_server="smtp.gmail.com", port=587, use_tls=True):
         self.smtp_server = os.getenv("SMTP_SERVER", smtp_server)
         self.port = int(os.getenv("SMTP_PORT", port))
         self.use_tls = use_tls
         self.username = os.getenv("SMTP_USER")
         self.password = os.getenv("SMTP_PASSWORD")
-        # Recipients can be list or single string
-        env_recipient = os.getenv("ALERT_EMAIL_RECIPIENT", "admin@example.com")
-        self.recipients = [env_recipient] if env_recipient else []
+        # Recipients loaded from Config or Env
+        self.recipients = []
 
     def send_alert(self, subject: str, message: str, details: Dict = None):
         logger.info(f"[EMAIL] Preparing to send email: {subject}")
         
         if not self.username or not self.password:
-            logger.warning("[EMAIL] SMTP credentials not found. Skipping.")
-            logger.info(f"[EMAIL MOCK] To: {self.recipients}\nSubject: {subject}\nBody: {message}")
+            logger.warning("[EMAIL] SMTP credentials missing. Skipping email send.")
             return
         
-        # Ensure recipients is a list
+        # Ensure list format
         recipients_list = self.recipients if isinstance(self.recipients, list) else [self.recipients]
         
         for recipient in recipients_list:
@@ -52,11 +65,13 @@ class EmailChannel(AlertChannel):
                     
                 logger.info(f"[EMAIL] Sent successfully to {recipient}")
             except Exception as e:
-                logger.error(f"[EMAIL] Failed to send email to {recipient}: {e}")
+                logger.error(f"[EMAIL] Failed to send to {recipient}: {e}")
 
+# --- ServiceNow Strategy ---
 class ServiceNowChannel(AlertChannel):
+    """Creates Incidents in ServiceNow via Table API."""
+    
     def __init__(self, instance_url=None, username=None, password=None):
-        # Default to env vars if not provided
         self.instance_url = instance_url or os.getenv("SNOW_INSTANCE_URL")
         self.username = username or os.getenv("SNOW_USER")
         self.password = password or os.getenv("SNOW_PASSWORD")
@@ -65,18 +80,16 @@ class ServiceNowChannel(AlertChannel):
         logger.info(f"[SERVICENOW] Preparing to create incident: {subject}")
         
         if not self.instance_url or not self.username or not self.password:
-            logger.warning("[SERVICENOW] Credentials missing (SNOW_INSTANCE_URL, SNOW_USER, SNOW_PASSWORD). Skipping API call.")
+            logger.warning("[SERVICENOW] Credentials missing. Skipping.")
             return
 
-        # ServiceNow Table API URL
-        # URL format: https://{instance}.service-now.com/api/now/table/incident
         api_url = f"{self.instance_url.rstrip('/')}/api/now/table/incident"
         
         payload = {
             "short_description": subject,
             "description": message,
             "category": "Software",
-            "priority": "2" # High
+            "priority": "2" # Medium/High Priority
         }
         
         headers = {
@@ -85,7 +98,6 @@ class ServiceNowChannel(AlertChannel):
         }
 
         try:
-            # Using httpx for HTTP requests
             response = httpx.post(
                 api_url, 
                 auth=(self.username, self.password), 
@@ -96,52 +108,55 @@ class ServiceNowChannel(AlertChannel):
             
             if response.status_code == 201:
                 data = response.json()
-                incident_number = data.get("result", {}).get("number", "Unknown")
-                logger.info(f"[SERVICENOW] Incident created successfully: {incident_number}")
+                ticket = data.get("result", {}).get("number", "Unknown")
+                logger.info(f"[SERVICENOW] Incident created: {ticket}")
             else:
-                logger.error(f"[SERVICENOW] Failed to create incident. Status: {response.status_code}, Body: {response.text}")
+                logger.error(f"[SERVICENOW] Failed. HTTP {response.status_code}: {response.text}")
                 
         except Exception as e:
-            logger.error(f"[SERVICENOW] Error connecting to ServiceNow: {e}")
+            logger.error(f"[SERVICENOW] Connection Exception: {e}")
 
+# --- Coordinator ---
 class AlertManager:
+    """
+    Manages multiple alert channels and dispatches notifications
+    to all registered channels upon failure.
+    """
+    
     def __init__(self):
         self.channels: List[AlertChannel] = []
-        # Default channels (using env vars still works as fallback)
+        # Initial registration (will be overwritten by configure())
         self.register_channel(EmailChannel())
-        # self.register_channel(ServiceNowChannel())
 
     def register_channel(self, channel: AlertChannel):
         self.channels.append(channel)
         
     def configure(self, config: Dict):
-        """Re-initialize channels with provided config dict"""
-        self.channels = [] # Reset channels
+        """
+        Dynamically configures channels based on JSON config.
+        Allows changing recipients or credentials without restart.
+        """
+        self.channels = [] # Reset
         
-        # Email Config
+        # 1. Configure Email
         smtp_conf = config.get("smtp_config", {})
-        recipients = config.get("email_recipients", []) # List[str]
+        recipients = config.get("email_recipients", [])
         
         if smtp_conf or recipients:
-             # Normalize recipients to single string for env var compat calling style, 
-             # OR update EmailChannel to handle list. 
-             # For minimal change, let's keep env var compat in mind, but prefer config.
-             
-             # Create args for EmailChannel
              server = smtp_conf.get("server", os.getenv("SMTP_SERVER", "smtp.gmail.com"))
              port = smtp_conf.get("port", int(os.getenv("SMTP_PORT", 587)))
              user = smtp_conf.get("sender_email", os.getenv("SMTP_USER"))
              password = smtp_conf.get("sender_password", os.getenv("SMTP_PASSWORD"))
              
-             # Recipient handling - Updated EmailChannel to support list or overriding
              channel = EmailChannel(smtp_server=server, port=port)
              channel.username = user
              channel.password = password
+             # Fallback to env var if config recipient is empty
              channel.recipients = recipients if recipients else [os.getenv("ALERT_EMAIL_RECIPIENT", "admin@example.com")]
              
              self.register_channel(channel)
              
-        # ServiceNow Config
+        # 2. Configure ServiceNow
         snow_conf = config.get("servicenow", {})
         if snow_conf:
             instance = snow_conf.get("instance_url", os.getenv("SNOW_INSTANCE_URL"))
@@ -150,30 +165,29 @@ class AlertManager:
             
             channel = ServiceNowChannel(instance_url=instance, username=user, password=password)
             self.register_channel(channel)
-        elif os.getenv("SNOW_INSTANCE_URL"):
-            # Fallback to env var if config not present but env var is
-            self.register_channel(ServiceNowChannel())
 
     def trigger_alert(self, filename: str, rule_name: str, failures: List[Dict]):
+        """
+        Constructs a formatted alert message and broadcasts it.
+        """
         if not failures:
             return
 
-        subject = f"File Validation Alert: {os.path.basename(filename)}"
-        message = f"The file '{os.path.basename(filename)}' has failed validation.\n"
-        message += f"Total Errors Found: {len(failures)}\n\n"
-        message += "Sample Errors:\n"
+        subject = f"File Validation Failure: {os.path.basename(filename)}"
+        message = f"File: {os.path.basename(filename)}\n"
+        message += f"Ruleset: {rule_name}\n"
+        message += f"Total Errors: {len(failures)}\n\n"
+        message += "--- Sample Errors ---\n"
         
-        for fail in failures[:10]: # Limit to first 10
+        for fail in failures[:10]:
             row = fail.get('row', 'N/A')
             msg = fail.get('message', 'Unknown issue')
-            message += f"- Row {row}: {msg}\n"
+            message += f"Row {row}: {msg}\n"
             
         if len(failures) > 10:
-            message += f"\n...and {len(failures) - 10} more errors."
+            message += f"...and {len(failures) - 10} more errors."
             
-        message += "\nPlease review and correct the file."
-
-        details = {"filename": filename, "error_count": len(failures), "sample_errors": failures[:5]}
+        details = {"filename": filename, "error_count": len(failures)}
 
         for channel in self.channels:
             channel.send_alert(subject, message, details)

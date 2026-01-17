@@ -1,3 +1,19 @@
+"""
+Large Dataset Generator
+-----------------------
+Utility script to generate synthetic test data for performance validation.
+Creates files with 75 columns and 200 rows, mixing strict financial data with random filler.
+
+Columns:
+  1C: Transaction ID (Startswith TXN)
+  2C: Client Name
+  3C: Currency (USD, EUR, GBP, INR, JPY)
+  4C: Amount (Numeric > 0)
+  5C: Account Type (Savings, Current, Corporate)
+  6C: Risk Score (0-100)
+  7C-75C: Filler Strings
+"""
+
 import csv
 import random
 import os
@@ -10,103 +26,105 @@ def ensure_dir(path):
         os.makedirs(path)
 
 def generate_row(is_valid, num_columns=75):
-    # Rules:
-    # 1C: starts with TXN
-    # 3C: USD|EUR|GBP|INR|JPY
-    # 4C: Numeric > 0
-    
+    """
+    Generates a single row of data.
+    If is_valid is False, injects random errors into the strict fields.
+    """
     row = []
     
-    # Col 1: ID
+    # --- Column 1: Transaction ID ---
+    # Rule: Must start with "TXN"
     if is_valid:
         row.append(f"TXN{random.randint(100000,999999)}")
     else:
-        # Invalid: 50% chance to fail this rule
+        # 50% chance to fail this specific rule
         if random.random() < 0.5:
             row.append("INVALID_ID")
         else:
             row.append(f"TXN{random.randint(100000,999999)}")
             
-    # Col 2: Name
+    # --- Column 2: Client Name ---
+    # Rule: No strict validation, just needs to be present
     row.append(f"Client_{random.randint(1,100)}")
     
-    # Col 3: Currency
+    # --- Column 3: Currency ---
+    # Rule: Must match standard ISO codes
     currencies = ["USD", "EUR", "GBP", "INR", "JPY"]
     if is_valid:
         row.append(random.choice(currencies))
     else:
-        # Invalid: If Col 1 was valid, force this to fail (or just fail randomly)
-        # To ensure "Invalid" file is actually invalid, we force failure on at least one field if we haven't yet.
-        # Simple approach: If is_valid=False, just randomize failure.
+        # Inject invalid currency code
         if random.random() < 0.5:
             row.append("BITCOIN") 
         else:
             row.append(random.choice(currencies))
             
-    # Col 4: Amount
+    # --- Column 4: Amount ---
+    # Rule: Must be a positive number
     if is_valid:
         row.append(round(random.uniform(10, 10000), 2))
     else:
+        # Inject negative amount
         if random.random() < 0.5:
             row.append(-100.50)
         else:
             row.append(round(random.uniform(10, 10000), 2))
             
-    # Col 5: Account Type
+    # --- Column 5: Account Type ---
+    # Rule: Must be Savings, Current, or Corporate
     acct_types = ["Savings", "Current", "Corporate"]
     if is_valid:
         row.append(random.choice(acct_types))
     else:
         if random.random() < 0.3:
-            row.append("Unknown_Type") # Invalid account
+            row.append("Unknown_Type")
         else:
             row.append(random.choice(acct_types))
 
-    # Col 6: Risk Score (0-100)
+    # --- Column 6: Risk Score ---
+    # Rule: 0 to 100
     if is_valid:
         row.append(random.randint(0, 100))
     else:
         if random.random() < 0.3:
-            row.append(999) # Invalid score > 100
+            row.append(999) # Invalid score
         else:
             row.append(random.randint(0, 100))
 
-    # Col 7 to 75: Filler Data
+    # --- Columns 7-75: Filler Data ---
+    # Used to test system performance with wide files
     for i in range(7, num_columns + 1):
         row.append(f"Val_{i}_{random.randint(100,999)}")
-        
-    # Ensure invalid file has at least one error if purely random choices accidentally made it valid
-    if not is_valid:
-        # Force Col 4 to be negative just in case
-        row[3] = -999.99
         
     return row
 
 def generate_files():
+    """Generates one Valid and one Invalid file in the output directory."""
+    print(f"[Generator] Starting generation for target directory: {OUTPUT_DIR}")
     ensure_dir(OUTPUT_DIR)
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     
-    # 1. Valid File
+    # 1. Generate Valid File
     fname_valid = f"Financial-Large-Valid-{timestamp}.txt"
     fpath_valid = os.path.join(OUTPUT_DIR, fname_valid)
     
     with open(fpath_valid, "w", newline="") as f:
         writer = csv.writer(f)
-        for _ in range(200):
+        for _ in range(200): # 200 Rows
             writer.writerow(generate_row(is_valid=True))
             
-    print(f"[Generator] Created Valid File: {fname_valid} (200 rows, 75 cols)")
+    print(f"[Generator] Created Valid File:   {fname_valid}")
 
-    # 2. Invalid File
+    # 2. Generate Invalid File
     fname_invalid = f"Financial-Large-Invalid-{timestamp}.txt"
     fpath_invalid = os.path.join(OUTPUT_DIR, fname_invalid)
     
     with open(fpath_invalid, "w", newline="") as f:
         writer = csv.writer(f)
-        for _ in range(200):
+        for _ in range(200): # 200 Rows
             writer.writerow(generate_row(is_valid=False))
             
-    print(f"[Generator] Created Invalid File: {fname_invalid} (200 rows, 75 cols)")
+    print(f"[Generator] Created Invalid File: {fname_invalid}")
 
 if __name__ == "__main__":
     generate_files()
