@@ -10,26 +10,40 @@ A dynamic, rule-driven file validation system designed to automate compliance mo
 - **Alerting**: Integrates with **Email** and **ServiceNow** for incident management.
 - **Management API**: REST API for managing rules and routes on the fly.
 
-## Structure
-- `src/validator/`: Core logic (Parser, Engine, Router, Alerter).
-- `verify_system.py`: End-to-end verification script.
-- `api.py`: FastAPI entry point.
+## Quick Start 🚀
 
-## Setup
-1. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Run the API (Backend + Dashboard):
-   ```bash
-   uvicorn src.validator.api:app --reload
-   ```
-   **OPEN DASHBOARD:** [http://localhost:8000/dashboard](http://localhost:8000/dashboard)
+### 1. One-Click Launch (Recommended)
+Double-click **`run.bat`** (Windows) to automatically:
+1.  Start the API & Dashboard.
+2.  Launch the Operations Dashboard in your browser.
+3.  Run the **Financial Stress Test** simulation.
 
-3. Run Validation Script (To generate activity):
-   ```bash
-   python stress_test.py
-   ```
+### 2. Manual Execution
+**Start the Dashboard/API:**
+```bash
+uvicorn src.validator.api:app --reload
+```
+*Access: [http://localhost:8000/dashboard](http://localhost:8000/dashboard)*
+
+**Run Validation Workflow:**
+```bash
+python stress_test.py
+```
+*This will generate unique timestamped financial data and validate it in real-time.*
+
+## Project Structure
+*   `src/validator/`: Core logic (Engine, Rules, Router, Alerter).
+*   `src/validator/static/`: Premium V5 Dashboard (HTML/CSS/JS).
+*   `src/validator/data_generator.py`: Dynamic test data generator.
+*   `stress_test.py`: Main simulation script.
+*   `run.bat`: Launcher script.
+*   `config.json`: Production rules configuration.
+
+## Features
+*   **Dynamic Data**: Generates fresh, randomized financial datasets on every run.
+*   **Real-Time Dashboard**: "Command Center" UI with live file tracking, charts, and incident history.
+*   **Smart Alerts**: Intelligent email and ServiceNow integration.
+*   **Custom DSL**: Define business rules in simple English (e.g., `1C REQUIRED`).
 
 ## Configuration
 Set environment variables for alerting:
