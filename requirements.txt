@@ -1,0 +1,5 @@
+ply
+fastapi
+uvicorn
+httpx
+pydantic
