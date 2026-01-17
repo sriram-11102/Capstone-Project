@@ -1,0 +1,26 @@
+{
+    "version": "1.0",
+    "last_updated": "2026-01-17T14:10:43.455574",
+    "routes": [
+        {
+            "pattern": "Finance-.*\\.txt",
+            "ruleset": "financial_rules",
+            "priority": 10
+        },
+        {
+            "pattern": "Inventory-.*\\.txt",
+            "ruleset": "inventory_rules",
+            "priority": 10
+        }
+    ],
+    "rulesets": {
+        "financial_rules": [
+            "3C > 1000"
+        ],
+        "inventory_rules": [
+            "2C > 0",
+            "1C STARTS_WITH \"Item\""
+        ]
+    },
+    "system_config": {}
+}

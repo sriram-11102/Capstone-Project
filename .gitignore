@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.csv
+*.txt
+config.json
+test_config.json
+demo_config.json
+validator.log
+.env
+venv/
+.pytest_cache/

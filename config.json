@@ -1,0 +1,22 @@
+{
+    "version": "1.0",
+    "last_updated": "2026-01-17T13:44:59.085609",
+    "routes": [
+        {
+            "pattern": "API-Test-.*\\.csv",
+            "ruleset": "api_test_rules",
+            "priority": 100
+        },
+        {
+            "pattern": "API-Test-.*\\.txt",
+            "ruleset": "api_test_rules",
+            "priority": 100
+        }
+    ],
+    "rulesets": {
+        "api_test_rules": [
+            "1C REQUIRED",
+            "2C > 50"
+        ]
+    }
+}

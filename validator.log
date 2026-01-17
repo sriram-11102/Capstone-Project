@@ -1,0 +1,140 @@
+2026-01-17 13:41:36,418 - validator - INFO - API: Updating ruleset api_test_rules
+2026-01-17 13:41:36,422 - validator - INFO - API: Fetching ruleset api_test_rules
+2026-01-17 13:41:36,426 - validator - INFO - API: Adding route for API-Test-.*\.csv
+2026-01-17 13:41:36,431 - validator - INFO - API: Triggering validation for F:\Project\API-Test-Data.csv
+2026-01-17 13:41:36,431 - validator - INFO - Processing file: F:\Project\API-Test-Data.csv
+2026-01-17 13:41:36,431 - validator - INFO - Routed to ruleset: None
+2026-01-17 13:41:36,432 - validator - WARNING - No matching route found for F:\Project\API-Test-Data.csv
+2026-01-17 13:42:15,423 - validator - INFO - API: Updating ruleset api_test_rules
+2026-01-17 13:42:15,427 - validator - INFO - API: Fetching ruleset api_test_rules
+2026-01-17 13:42:15,806 - validator - INFO - API: Adding route for API-Test-.*\.csv
+2026-01-17 13:42:15,811 - validator - INFO - API: Triggering validation for F:\Project\API-Test-Data.csv
+2026-01-17 13:42:15,811 - validator - INFO - Processing file: F:\Project\API-Test-Data.csv
+2026-01-17 13:42:15,819 - validator - INFO - Routed to ruleset: api_test_rules
+2026-01-17 13:42:15,820 - validator - ERROR - Validation failed with 2 errors.
+2026-01-17 13:42:15,820 - validator - INFO - [EMAIL ALERT] Subject: Validation Failed: F:\Project\API-Test-Data.csv
+2026-01-17 13:42:15,820 - validator - INFO - Body: File F:\Project\API-Test-Data.csv failed validation on ruleset api_test_rules.
+Total failures: 2
+
+- Rule: {'type': 'validation', 'column': 1, 'validation': 'required'}
+  Error: Column 1C is required: False
+- Rule: {'type': 'comparison', 'column': 2, 'operator': '>', 'value': 50}
+  Error: Column 2C = 20, Expected > 50
+
+2026-01-17 13:42:15,820 - validator - INFO - Details: {'filename': 'F:\\Project\\API-Test-Data.csv', 'failures': [{'rule': {'type': 'validation', 'column': 1, 'validation': 'required'}, 'passed': False, 'message': 'Column 1C is required: False', 'row': 2}, {'rule': {'type': 'comparison', 'column': 2, 'operator': '>', 'value': 50}, 'passed': False, 'message': 'Column 2C = 20, Expected > 50', 'row': 2}]}
+2026-01-17 13:42:15,820 - validator - INFO - --------------------
+2026-01-17 13:43:44,533 - validator - INFO - Processing file: Accounting-V_Global-US-2023.txt
+2026-01-17 13:43:44,534 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 13:43:44,540 - validator - INFO - Validation successful.
+2026-01-17 13:43:44,540 - validator - INFO - Processing file: Accounting-BadVendor-US-2023.txt
+2026-01-17 13:43:44,541 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 13:43:44,542 - validator - ERROR - Validation failed with 3 errors.
+2026-01-17 13:43:44,542 - validator - INFO - [EMAIL ALERT] Subject: Validation Failed: Accounting-BadVendor-US-2023.txt
+2026-01-17 13:43:44,542 - validator - INFO - Body: File Accounting-BadVendor-US-2023.txt failed validation on ruleset financial_rules.
+Total failures: 3
+
+- Rule: {'type': 'pattern', 'column': 2, 'operator': 'starts_with', 'pattern': 'V_'}
+  Error: Column 2C starts_with 'V_': False
+- Rule: {'type': 'comparison', 'column': 3, 'operator': '>', 'value': 0}
+  Error: Column 3C = -100, Expected > 0
+- Rule: {'type': 'validation', 'column': 1, 'validation': 'required'}
+  Error: Column 1C is required: False
+
+2026-01-17 13:43:44,542 - validator - INFO - Details: {'filename': 'Accounting-BadVendor-US-2023.txt', 'failures': [{'rule': {'type': 'pattern', 'column': 2, 'operator': 'starts_with', 'pattern': 'V_'}, 'passed': False, 'message': "Column 2C starts_with 'V_': False", 'row': 1, 'vendor': 'BadVendor', 'geo': 'US', 'period': '2023'}, {'rule': {'type': 'comparison', 'column': 3, 'operator': '>', 'value': 0}, 'passed': False, 'message': 'Column 3C = -100, Expected > 0', 'row': 2, 'vendor': 'BadVendor', 'geo': 'US', 'period': '2023'}, {'rule': {'type': 'validation', 'column': 1, 'validation': 'required'}, 'passed': False, 'message': 'Column 1C is required: False', 'row': 3, 'vendor': 'BadVendor', 'geo': 'US', 'period': '2023'}]}
+2026-01-17 13:43:44,542 - validator - INFO - --------------------
+2026-01-17 13:44:01,110 - validator - INFO - API: Updating ruleset api_test_rules
+2026-01-17 13:44:01,115 - validator - INFO - API: Fetching ruleset api_test_rules
+2026-01-17 13:44:01,118 - validator - INFO - API: Adding route for API-Test-.*\.txt
+2026-01-17 13:44:01,122 - validator - INFO - API: Triggering validation for F:\Project\API-Test-Data.txt
+2026-01-17 13:44:01,123 - validator - INFO - Processing file: F:\Project\API-Test-Data.txt
+2026-01-17 13:44:01,131 - validator - INFO - Routed to ruleset: api_test_rules
+2026-01-17 13:44:01,132 - validator - ERROR - Validation failed with 2 errors.
+2026-01-17 13:44:01,132 - validator - INFO - [EMAIL ALERT] Subject: Validation Failed: F:\Project\API-Test-Data.txt
+2026-01-17 13:44:01,132 - validator - INFO - Body: File F:\Project\API-Test-Data.txt failed validation on ruleset api_test_rules.
+Total failures: 2
+
+- Rule: {'type': 'validation', 'column': 1, 'validation': 'required'}
+  Error: Column 1C is required: False
+- Rule: {'type': 'comparison', 'column': 2, 'operator': '>', 'value': 50}
+  Error: Column 2C = 20, Expected > 50
+
+2026-01-17 13:44:01,132 - validator - INFO - Details: {'filename': 'F:\\Project\\API-Test-Data.txt', 'failures': [{'rule': {'type': 'validation', 'column': 1, 'validation': 'required'}, 'passed': False, 'message': 'Column 1C is required: False', 'row': 2}, {'rule': {'type': 'comparison', 'column': 2, 'operator': '>', 'value': 50}, 'passed': False, 'message': 'Column 2C = 20, Expected > 50', 'row': 2}]}
+2026-01-17 13:44:01,132 - validator - INFO - --------------------
+2026-01-17 13:44:52,142 - validator - INFO - Processing file: Accounting-V_Global-US-2023.txt
+2026-01-17 13:44:52,142 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 13:44:52,143 - validator - INFO - Validation successful.
+2026-01-17 13:44:52,143 - validator - INFO - Processing file: Accounting-BadVendor-US-2023.txt
+2026-01-17 13:44:52,144 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 13:44:52,145 - validator - ERROR - Validation failed with 3 errors.
+2026-01-17 13:44:52,145 - validator - INFO - [EMAIL ALERT] Subject: Validation Failed: Accounting-BadVendor-US-2023.txt
+2026-01-17 13:44:52,145 - validator - INFO - Body: File Accounting-BadVendor-US-2023.txt failed validation on ruleset financial_rules.
+Total failures: 3
+
+- Rule: {'type': 'pattern', 'column': 2, 'operator': 'starts_with', 'pattern': 'V_'}
+  Error: Column 2C starts_with 'V_': False
+- Rule: {'type': 'comparison', 'column': 3, 'operator': '>', 'value': 0}
+  Error: Column 3C = -100, Expected > 0
+- Rule: {'type': 'validation', 'column': 1, 'validation': 'required'}
+  Error: Column 1C is required: False
+
+2026-01-17 13:44:52,145 - validator - INFO - Details: {'filename': 'Accounting-BadVendor-US-2023.txt', 'failures': [{'rule': {'type': 'pattern', 'column': 2, 'operator': 'starts_with', 'pattern': 'V_'}, 'passed': False, 'message': "Column 2C starts_with 'V_': False", 'row': 1, 'vendor': 'BadVendor', 'geo': 'US', 'period': '2023'}, {'rule': {'type': 'comparison', 'column': 3, 'operator': '>', 'value': 0}, 'passed': False, 'message': 'Column 3C = -100, Expected > 0', 'row': 2, 'vendor': 'BadVendor', 'geo': 'US', 'period': '2023'}, {'rule': {'type': 'validation', 'column': 1, 'validation': 'required'}, 'passed': False, 'message': 'Column 1C is required: False', 'row': 3, 'vendor': 'BadVendor', 'geo': 'US', 'period': '2023'}]}
+2026-01-17 13:44:52,145 - validator - INFO - --------------------
+2026-01-17 13:44:59,079 - validator - INFO - API: Updating ruleset api_test_rules
+2026-01-17 13:44:59,082 - validator - INFO - API: Fetching ruleset api_test_rules
+2026-01-17 13:44:59,085 - validator - INFO - API: Adding route for API-Test-.*\.txt
+2026-01-17 13:44:59,089 - validator - INFO - API: Triggering validation for F:\Project\API-Test-Data.txt
+2026-01-17 13:44:59,089 - validator - INFO - Processing file: F:\Project\API-Test-Data.txt
+2026-01-17 13:44:59,097 - validator - INFO - Routed to ruleset: api_test_rules
+2026-01-17 13:44:59,098 - validator - ERROR - Validation failed with 2 errors.
+2026-01-17 13:44:59,098 - validator - INFO - [EMAIL ALERT] Subject: Validation Failed: F:\Project\API-Test-Data.txt
+2026-01-17 13:44:59,098 - validator - INFO - Body: File F:\Project\API-Test-Data.txt failed validation on ruleset api_test_rules.
+Total failures: 2
+
+- Rule: {'type': 'validation', 'column': 1, 'validation': 'required'}
+  Error: Column 1C is required: False
+- Rule: {'type': 'comparison', 'column': 2, 'operator': '>', 'value': 50}
+  Error: Column 2C = 20, Expected > 50
+
+2026-01-17 13:44:59,098 - validator - INFO - Details: {'filename': 'F:\\Project\\API-Test-Data.txt', 'failures': [{'rule': {'type': 'validation', 'column': 1, 'validation': 'required'}, 'passed': False, 'message': 'Column 1C is required: False', 'row': 2}, {'rule': {'type': 'comparison', 'column': 2, 'operator': '>', 'value': 50}, 'passed': False, 'message': 'Column 2C = 20, Expected > 50', 'row': 2}]}
+2026-01-17 13:44:59,098 - validator - INFO - --------------------
+2026-01-17 13:53:44,168 - validator - INFO - Processing file: Accounting-V_Global-US-2023.txt
+2026-01-17 13:53:44,181 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 13:53:44,185 - validator - INFO - Validation successful.
+2026-01-17 13:53:44,185 - validator - INFO - Processing file: Accounting-BadVendor-US-2023.txt
+2026-01-17 13:53:44,185 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 13:53:44,187 - validator - ERROR - Validation failed with 3 errors.
+2026-01-17 13:53:44,187 - validator - INFO - [EMAIL] Preparing to send email: Validation Failed: Accounting-BadVendor-US-2023.txt
+2026-01-17 13:53:59,219 - validator - ERROR - [EMAIL] Failed to send email to 202117B3762@wilp.bits-pilani.ac.in: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials d9443c01a7336-2a7193dc83dsm40696935ad.50 - gsmtp')
+2026-01-17 13:54:13,963 - validator - ERROR - [EMAIL] Failed to send email to sriramramanathan9544@gmail.com: (535, b'5.7.8 Username and Password not accepted. For more information, go to\n5.7.8  https://support.google.com/mail/?p=BadCredentials 41be03b00d2f7-c5edf35c1basm769481a12.26 - gsmtp')
+2026-01-17 13:54:13,964 - validator - INFO - [SERVICENOW] Preparing to create incident: Validation Failed: Accounting-BadVendor-US-2023.txt
+2026-01-17 13:54:15,450 - validator - ERROR - [SERVICENOW] Failed to create incident. Status: 400, Body: Bad Request
+This combination of host and port requires TLS.
+
+2026-01-17 14:01:29,985 - validator - INFO - Processing file: Accounting-V_Global-US-2023.txt
+2026-01-17 14:01:29,987 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 14:01:29,989 - validator - INFO - Validation successful.
+2026-01-17 14:01:29,989 - validator - INFO - Processing file: Accounting-BadVendor-US-2023.txt
+2026-01-17 14:01:29,989 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 14:01:29,991 - validator - ERROR - Validation failed with 3 errors.
+2026-01-17 14:01:29,991 - validator - INFO - [EMAIL] Preparing to send email: Validation Failed: Accounting-BadVendor-US-2023.txt
+2026-01-17 14:01:45,490 - validator - INFO - [EMAIL] Sent successfully to 202117B3762@wilp.bits-pilani.ac.in
+2026-01-17 14:02:01,051 - validator - INFO - [EMAIL] Sent successfully to sriramramanathan9544@gmail.com
+2026-01-17 14:02:01,051 - validator - INFO - [SERVICENOW] Preparing to create incident: Validation Failed: Accounting-BadVendor-US-2023.txt
+2026-01-17 14:02:03,799 - validator - INFO - [SERVICENOW] Incident created successfully: INC0010001
+2026-01-17 14:04:41,705 - validator - INFO - Processing file: Accounting-V_Global-US-2023.txt
+2026-01-17 14:04:41,706 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 14:04:41,716 - validator - INFO - Validation successful.
+2026-01-17 14:04:41,716 - validator - INFO - Processing file: Accounting-BadVendor-US-2023.txt
+2026-01-17 14:04:41,717 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 14:04:41,727 - validator - ERROR - Validation failed with 40 errors.
+2026-01-17 14:04:41,727 - validator - INFO - [EMAIL] Preparing to send email: File Validation Alert: Accounting-BadVendor-US-2023.txt
+2026-01-17 14:04:57,204 - validator - INFO - [EMAIL] Sent successfully to 202117B3762@wilp.bits-pilani.ac.in
+2026-01-17 14:05:12,542 - validator - INFO - [EMAIL] Sent successfully to sriramramanathan9544@gmail.com
+2026-01-17 14:05:12,542 - validator - INFO - [SERVICENOW] Preparing to create incident: File Validation Alert: Accounting-BadVendor-US-2023.txt
+2026-01-17 14:05:14,295 - validator - INFO - [SERVICENOW] Incident created successfully: INC0010002
+2026-01-17 14:10:43,468 - validator - INFO - Processing file: F:\Project\Finance-2024.txt
+2026-01-17 14:10:43,469 - validator - INFO - Routed to ruleset: financial_rules
+2026-01-17 14:10:43,476 - validator - ERROR - Validation failed with 1 errors.
+2026-01-17 14:10:43,476 - validator - INFO - Processing file: F:\Project\Inventory-Warehouse.txt
+2026-01-17 14:10:43,476 - validator - INFO - Routed to ruleset: inventory_rules
+2026-01-17 14:10:43,483 - validator - INFO - Validation successful.
