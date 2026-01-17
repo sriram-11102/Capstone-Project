@@ -38,7 +38,8 @@
             min-height: 100vh;
             display: grid;
             grid-template-columns: 280px 1fr;
-            overflow: hidden;
+            /* Allow body to scroll if needed on small screens, but prefer main scroll */
+            overflow-x: hidden;
         }
 
         /* Sidebar */
@@ -49,6 +50,9 @@
             display: flex;
             flex-direction: column;
             gap: 2rem;
+            position: sticky;
+            top: 0;
+            height: 100vh;
         }
 
         .logo {
@@ -117,10 +121,12 @@
         /* Main Content */
         main {
             padding: 2rem;
-            overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 2rem;
+            /* Ensure main content scrolls properly */
+            overflow-y: auto;
+            max-height: 100vh;
         }
 
         header {
@@ -142,7 +148,7 @@
         /* KPI Grid */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1.5rem;
         }
 
@@ -153,6 +159,8 @@
             padding: 1.5rem;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .card::after {
@@ -198,46 +206,130 @@
             display: grid;
             grid-template-columns: 2fr 1fr;
             gap: 1.5rem;
-            height: 350px;
+            min-height: 350px;
         }
 
         .chart-container {
             width: 100%;
             height: 100%;
+            min-height: 300px;
             position: relative;
         }
 
-        /* Terminal Logs */
-        .terminal-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 400px;
+        /* Rules & Logs Tables */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
         }
 
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 1rem;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        tr:hover {
+            background: var(--surface-hover);
+            cursor: pointer;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 500px;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: scale(0.95);
+            transition: transform 0.2s;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-overlay.open .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .rule-item {
+            background: var(--surface);
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            border-left: 3px solid var(--primary);
+        }
+
+        /* Logs */
         .terminal {
             background: #0d0d0d;
             border-radius: 12px;
             border: 1px solid var(--border);
-            flex: 1;
             padding: 1.5rem;
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.9rem;
+            max-height: 400px;
             overflow-y: auto;
-            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
         .log-entry {
             margin-bottom: 0.5rem;
-            opacity: 0;
-            animation: fadeIn 0.3s forwards;
             display: flex;
             gap: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding-bottom: 0.25rem;
         }
 
         .log-time {
             color: var(--text-muted);
             opacity: 0.5;
+            min-width: 150px;
         }
 
         .log-msg {
@@ -246,16 +338,15 @@
 
         .log-entry.error .log-msg {
             color: var(--error);
-            font-weight: bold;
         }
 
         .log-entry.success .log-msg {
             color: var(--success);
         }
 
-        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
+            height: 8px;
         }
 
         ::-webkit-scrollbar-track {
@@ -265,10 +356,6 @@
         ::-webkit-scrollbar-thumb {
             background: var(--surface-hover);
             border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-muted);
         }
 
         @keyframes pulse {
@@ -284,12 +371,6 @@
                 box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
             }
         }
-
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-            }
-        }
     </style>
 </head>
 
@@ -298,9 +379,8 @@
         <div class="logo">VALIDATOR</div>
         <nav>
             <button class="active">Overview</button>
-            <button>Rulesets</button>
-            <button>Alert History</button>
-            <button>Settings</button>
+            <button onclick="scrollToSection('incidents')">Recents Incidents</button>
+            <button onclick="scrollToSection('rules')">Rulesets</button>
         </nav>
         <div class="sys-status" id="sys-status">SYSTEM ONLINE</div>
     </aside>
@@ -311,9 +391,9 @@
                 <h1>Command Center</h1>
                 <div class="subtitle">Live System Telemetry</div>
             </div>
-            <button onclick="fetchLogs()"
+            <button onclick="updateDashboard()"
                 style="padding: 0.75rem 1.5rem; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 8px; cursor: pointer;">Refresh
-                Data</button>
+                Now</button>
         </header>
 
         <!-- KPIS -->
@@ -321,29 +401,30 @@
             <div class="card">
                 <div class="kpi-label">Total Transactions</div>
                 <div class="kpi-value" id="kpi-processed">--</div>
-                <div class="kpi-trend trend-up">▲ +12% vs last hour</div>
+                <div class="kpi-trend trend-up">▲ 24h Activity</div>
             </div>
             <div class="card">
                 <div class="kpi-label">Success Rate</div>
                 <div class="kpi-value" id="kpi-success">--%</div>
-                <div class="kpi-trend trend-up">Stable</div>
+                <div class="kpi-trend trend-up">Operational</div>
             </div>
             <div class="card">
                 <div class="kpi-label">Active Alerts</div>
                 <div class="kpi-value" style="color: var(--error)" id="kpi-alerts">--</div>
-                <div class="kpi-trend trend-down" style="color: var(--text-muted)">Requires Attention</div>
+                <div class="kpi-trend trend-down">Incidents Pending</div>
             </div>
             <div class="card">
-                <div class="kpi-label">Rulesets Active</div>
-                <div class="kpi-value" style="color: var(--primary)">4</div>
-                <div class="kpi-trend">Financial, API, Custom</div>
+                <div class="kpi-label">Server Status</div>
+                <div class="kpi-value" style="color: var(--success); font-size: 1.5rem; line-height: 2.5rem;">HEALTHY
+                </div>
+                <div class="kpi-trend">Latency: 12ms</div>
             </div>
         </div>
 
         <!-- Charts -->
         <div class="analytics-row">
             <div class="card">
-                <div class="kpi-label" style="margin-bottom: 1rem">Traffic Volume (Last 24h)</div>
+                <div class="kpi-label" style="margin-bottom: 1rem">Traffic Volume</div>
                 <div class="chart-container">
                     <canvas id="volumeChart"></canvas>
                 </div>
@@ -356,19 +437,69 @@
             </div>
         </div>
 
+        <!-- Recent Alerts Table -->
+        <div class="card" id="incidents">
+            <div class="kpi-label" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text)">Recent Incidents &
+                Alerts</div>
+            <div class="table-container">
+                <table id="alert-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Type</th>
+                            <th>Message</th>
+                        </tr>
+                    </thead>
+                    <tbody><!-- Populated via JS --></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Rulesets -->
+        <div class="card" id="rules">
+            <div class="kpi-label" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--text)">Active Rulesets
+                (Click to Inspect)</div>
+            <div class="table-container">
+                <table id="ruleset-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Rule Count</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody><!-- Populated via JS --></tbody>
+                </table>
+            </div>
+        </div>
+
         <!-- Logs -->
-        <div class="terminal-container">
-            <div style="margin-bottom: 0.75rem; font-weight: 600; font-size: 1.1rem;">Live System Logs</div>
+        <div class="card">
+            <div class="kpi-label" style="margin-bottom: 1rem">Live Terminal Options</div>
             <div class="terminal" id="terminal-feed">
                 <!-- Logs will be injected here -->
             </div>
         </div>
     </main>
 
+    <!-- Modal -->
+    <div class="modal-overlay" id="rule-modal" onclick="closeModal(event)">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Ruleset Details</h3>
+                <button onclick="closeModal()"
+                    style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-content">
+                <!-- Rules injected here -->
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_BASE = window.location.origin;
 
-        // Initialize Charts
+        // --- Mock Data for Charts (Dynamic real data would require history API) --
         const ctxVol = document.getElementById('volumeChart').getContext('2d');
         const volChart = new Chart(ctxVol, {
             type: 'line',
@@ -400,6 +531,8 @@
             options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
         });
 
+        // --- Data Fetching ---
+
         async function updateDashboard() {
             try {
                 // Fetch Stats
@@ -407,16 +540,23 @@
                 const stats = await resStats.json();
 
                 document.getElementById('kpi-processed').innerText = stats.files_processed.toLocaleString();
-                document.getElementById('kpi-success').innerText = stats.success_rate;
+                document.getElementById('kpi-success').innerText = stats.success_rate + "%";
                 document.getElementById('kpi-alerts').innerText = stats.active_alerts;
 
-                // Update Logs
+                // Fetch Logs & Process for Alerts
                 const resLogs = await fetch(`${API_BASE}/logs`);
                 const logData = await resLogs.json();
+                const logs = logData.logs.reverse(); // Newest first
+
+                // Update Terminal
                 const terminal = document.getElementById('terminal-feed');
                 terminal.innerHTML = '';
 
-                logData.logs.reverse().forEach(line => {
+                const alertTbody = document.querySelector('#alert-table tbody');
+                alertTbody.innerHTML = '';
+
+                logs.forEach(line => {
+                    // Terminal Entry
                     const row = document.createElement('div');
                     row.className = 'log-entry';
                     if (line.includes('[EMAIL]') || line.includes('[SERVICENOW]')) row.classList.add('success');
@@ -427,9 +567,53 @@
 
                     row.innerHTML = `<span class="log-time">${time}</span><span class="log-msg">${msg}</span>`;
                     terminal.appendChild(row);
+
+                    // Alert Table Entry
+                    if (line.includes('[EMAIL]') || line.includes('[SERVICENOW]') || line.includes('ERROR')) {
+                        const tr = document.createElement('tr');
+                        let type = "SYSTEM";
+                        if (line.includes('EMAIL')) type = "EMAIL ALERT";
+                        if (line.includes('SERVICENOW')) type = "INCIDENT";
+                        if (line.includes('ERROR')) type = "VALIDATION FAIL";
+
+                        tr.innerHTML = `<td>${time}</td><td style="font-weight:bold; color: ${type.includes('FAIL') ? 'var(--error)' : 'var(--success)'}">${type}</td><td>${msg}</td>`;
+                        alertTbody.appendChild(tr);
+                    }
+                });
+
+                // Fetch Rulesets
+                const resRules = await fetch(`${API_BASE}/rulesets`);
+                const rules = await resRules.json();
+                const rulesTbody = document.querySelector('#ruleset-table tbody');
+                rulesTbody.innerHTML = '';
+
+                Object.keys(rules).forEach(name => {
+                    const tr = document.createElement('tr');
+                    tr.onclick = () => showRuleset(name, rules[name]);
+                    tr.innerHTML = `<td>${name}</td><td>${rules[name].length} Rules</td><td><span style="color:var(--success)">Active</span></td>`;
+                    rulesTbody.appendChild(tr);
                 });
 
             } catch (e) { console.error(e); }
+        }
+
+        // --- UI Interactions ---
+
+        function showRuleset(name, rules) {
+            document.getElementById('modal-title').innerText = name;
+            const content = document.getElementById('modal-content');
+            content.innerHTML = rules.map(r => `<div class="rule-item">${r}</div>`).join('');
+            document.getElementById('rule-modal').classList.add('open');
+        }
+
+        function closeModal(e) {
+            if (!e || e.target.id === 'rule-modal' || !e.target.closest('.modal')) {
+                document.getElementById('rule-modal').classList.remove('open');
+            }
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
         }
 
         setInterval(updateDashboard, 2000);
