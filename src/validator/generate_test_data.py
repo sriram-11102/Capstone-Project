@@ -104,8 +104,8 @@ def generate_files():
     ensure_dir(OUTPUT_DIR)
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     
-    # 1. Generate 5 Valid Files
-    for i in range(1, 6):
+    # 1. Generate 10 Valid Files
+    for i in range(1, 11):
         fname_valid = f"Financial-Large-Valid-{timestamp}-{i}.txt"
         fpath_valid = os.path.join(OUTPUT_DIR, fname_valid)
         
@@ -115,8 +115,8 @@ def generate_files():
                 writer.writerow(generate_row(is_valid=True))
         print(f"[Generator] Created Valid File:   {fname_valid}")
 
-    # 2. Generate 15 Invalid Files
-    for i in range(1, 16):
+    # 2. Generate 3 Invalid Files
+    for i in range(1, 4):
         fname_invalid = f"Financial-Large-Invalid-{timestamp}-{i}.txt"
         fpath_invalid = os.path.join(OUTPUT_DIR, fname_invalid)
         
