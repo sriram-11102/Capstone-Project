@@ -62,14 +62,29 @@ def read_root():
 @app.get("/stats")
 def get_stats():
     """
-    Returns system telemetry for the dashboard.
-    Note: In a real DB-backed system, this would query historical tables.
-    For this demo, we mock active states.
+    Returns system telemetry calculated from the file system.
     """
+    processed_dir = "processed"
+    rejected_dir = "rejected"
+    
+    # Ensure dirs exist to avoid errors
+    if not os.path.exists(processed_dir): os.makedirs(processed_dir)
+    if not os.path.exists(rejected_dir): os.makedirs(rejected_dir)
+    
+    # Count files (excluding directories)
+    count_processed = len([name for name in os.listdir(processed_dir) if os.path.isfile(os.path.join(processed_dir, name))])
+    count_rejected = len([name for name in os.listdir(rejected_dir) if os.path.isfile(os.path.join(rejected_dir, name))])
+    
+    total = count_processed + count_rejected
+    if total > 0:
+        rate = round((count_processed / total) * 100, 1)
+    else:
+        rate = 100.0
+        
     return {
-        "files_processed": 5000, # Mocked metric
-        "success_rate": 98.5,
-        "active_alerts": 3,
+        "files_processed": total,
+        "success_rate": rate,
+        "active_alerts": count_rejected,
         "system_status": "OPERATIONAL"
     }
 
