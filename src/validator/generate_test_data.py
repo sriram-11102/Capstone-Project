@@ -104,27 +104,27 @@ def generate_files():
     ensure_dir(OUTPUT_DIR)
     timestamp = time.strftime("%Y%m%d-%H%M%S")
     
-    # 1. Generate Valid File
-    fname_valid = f"Financial-Large-Valid-{timestamp}.txt"
-    fpath_valid = os.path.join(OUTPUT_DIR, fname_valid)
-    
-    with open(fpath_valid, "w", newline="") as f:
-        writer = csv.writer(f)
-        for _ in range(200): # 200 Rows
-            writer.writerow(generate_row(is_valid=True))
-            
-    print(f"[Generator] Created Valid File:   {fname_valid}")
+    # 1. Generate 5 Valid Files
+    for i in range(1, 6):
+        fname_valid = f"Financial-Large-Valid-{timestamp}-{i}.txt"
+        fpath_valid = os.path.join(OUTPUT_DIR, fname_valid)
+        
+        with open(fpath_valid, "w", newline="") as f:
+            writer = csv.writer(f)
+            for _ in range(200): # 200 Rows
+                writer.writerow(generate_row(is_valid=True))
+        print(f"[Generator] Created Valid File:   {fname_valid}")
 
-    # 2. Generate Invalid File
-    fname_invalid = f"Financial-Large-Invalid-{timestamp}.txt"
-    fpath_invalid = os.path.join(OUTPUT_DIR, fname_invalid)
-    
-    with open(fpath_invalid, "w", newline="") as f:
-        writer = csv.writer(f)
-        for _ in range(200): # 200 Rows
-            writer.writerow(generate_row(is_valid=False))
-            
-    print(f"[Generator] Created Invalid File: {fname_invalid}")
+    # 2. Generate 15 Invalid Files
+    for i in range(1, 16):
+        fname_invalid = f"Financial-Large-Invalid-{timestamp}-{i}.txt"
+        fpath_invalid = os.path.join(OUTPUT_DIR, fname_invalid)
+        
+        with open(fpath_invalid, "w", newline="") as f:
+            writer = csv.writer(f)
+            for _ in range(200): # 200 Rows
+                writer.writerow(generate_row(is_valid=False))
+        print(f"[Generator] Created Invalid File: {fname_invalid}")
 
 if __name__ == "__main__":
     generate_files()

@@ -635,11 +635,11 @@
                     const t = line.substring(0, 19);
                     const m = line.substring(20);
 
-                    if (line.includes('ERROR') || line.includes('Incident') || line.includes('EMAIL')) {
+                    if (line.includes('Validation failed') || line.includes('Incident created')) {
                         const tr = document.createElement('tr');
-                        const badge = line.includes('ERROR') ? 'bg-red' : 'bg-green';
-                        const txt = line.includes('ERROR') ? 'FAILURE' : 'ALERT';
-                        const type = line.includes('Incident') ? 'ServiceNow' : (line.includes('EMAIL') ? 'SMTP' : 'Validator');
+                        const badge = line.includes('Validation failed') ? 'bg-red' : 'bg-green';
+                        const txt = line.includes('Validation failed') ? 'FAILURE' : 'TICKET';
+                        const type = line.includes('Incident') ? 'ServiceNow' : 'Validator';
 
                         tr.innerHTML = `<td style="padding-left:1.5rem; font-family:'JetBrains Mono'">${t}</td><td><span class="badge ${badge}">${txt}</span></td><td>${type}</td><td>${m}</td>`;
                         tblInc.appendChild(tr);
