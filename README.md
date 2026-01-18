@@ -12,8 +12,6 @@ A dynamic, rule-driven file validation system designed to automate compliance mo
 
 ## Quick Start 🚀
 
-## Quick Start 🚀
-
 ### 1. One-Click Launch
 Double-click **`run.bat`** (Windows) to:
 1.  Start the API & Dashboard.
