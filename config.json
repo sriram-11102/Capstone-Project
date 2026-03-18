@@ -23,7 +23,8 @@
             "4C > 0",
             "5C MATCHES \"(Savings|Current|Corporate)\"",
             "6C IS NUMERIC",
-            "6C <= 100"
+            "6C <= 100",
+            "7C = -444"
         ],
         "default_rules": [
             "1C REQUIRED"
@@ -31,19 +32,18 @@
     },
     "system_config": {
         "email_recipients": [
-            "youremail@email.com",
-            "youremail@email.com"
+            "admin@example.com"
         ],
         "smtp_config": {
             "server": "smtp.gmail.com",
             "port": 587,
-            "sender_email": "youremail@email.com",
-            "sender_password": "password"
+            "sender_email": "sender@example.com",
+            "sender_password": "your_password_here"
         },
         "servicenow": {
-            "instance_url": "https://dev275610.service-now.com/",
+            "instance_url": "https://dev000000.service-now.com/",
             "username": "admin",
-            "password": "password"
+            "password": "your_snow_password_here"
         }
     }
 }

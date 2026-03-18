@@ -10,7 +10,7 @@ Responsibilities:
 5. Execute Validation logic.
 6. Trigger Alerts on failure.
 
-Author: Sriram
+Author: Author Name
 Last Updated: Jan 2026
 """
 

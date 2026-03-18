@@ -12,7 +12,7 @@ Supported Features:
 - Ranges: '4C BETWEEN 10 AND 1000'
 - Existence: '1C REQUIRED'
 
-Author: Sriram
+Author: Author Name
 Last Updated: Jan 2026
 """
 
@@ -231,7 +231,7 @@ def p_pattern_operator(p):
 
 # 5. Range rule: 4C BETWEEN 10 AND 20
 def p_range_rule(p):
-    """range_rule : COLUMN_REF BETWEEN NUMBER AND NUMBER"""
+    """range_rule : COLUMN_REF BETWEEN signed_number AND signed_number"""
     p[0] = {"type": "range", "column": p[1], "min": p[3], "max": p[5]}
 
 # 6. Validation rule: 1C REQUIRED
@@ -240,11 +240,22 @@ def p_validation_rule(p):
     p[0] = {"type": "validation", "column": p[1], "validation": "required"}
 
 # Helpers
+def p_signed_number(p):
+    """signed_number : NUMBER
+    | MINUS NUMBER"""
+    if len(p) == 2:
+        p[0] = p[1]
+    else:
+        p[0] = -p[2]
+
 def p_value(p):
-    """value : NUMBER
-    | STRING
-    | COLUMN_REF"""
+    """value : signed_number
+    | STRING"""
     p[0] = p[1]
+
+def p_value_col(p):
+    """value : COLUMN_REF"""
+    p[0] = ("col", p[1])
 
 def p_expression(p):
     """expression : term
@@ -265,13 +276,16 @@ def p_term(p):
         p[0] = ("binary", p[2], p[1], p[3])
 
 def p_factor(p):
-    """factor : COLUMN_REF
-    | NUMBER
+    """factor : signed_number
     | LPAREN expression RPAREN"""
     if len(p) == 2:
         p[0] = p[1]
     else:
         p[0] = p[2]
+
+def p_factor_col(p):
+    """factor : COLUMN_REF"""
+    p[0] = ("col", p[1])
 
 def p_error(p):
     if p:
@@ -330,12 +344,11 @@ class DSLInterpreter:
     def evaluate_expression(self, expr, data):
         """Recursive evaluation of arithmetic expressions."""
         if isinstance(expr, (int, float)):
-            # If int, it *could* be a column index from the parser
-            if isinstance(expr, int) and expr in data:
-                return data.get(expr)
             return expr
         elif isinstance(expr, tuple):
-            if expr[0] == "binary":
+            if expr[0] == "col":
+                return data.get(expr[1])
+            elif expr[0] == "binary":
                 op = expr[1]
                 left = self.evaluate_expression(expr[2], data)
                 right = self.evaluate_expression(expr[3], data)
@@ -417,8 +430,8 @@ class DSLInterpreter:
             actual_value = data.get(column)
 
             # Resolve expected value if it's a column reference
-            if isinstance(expected_value, int) and expected_value in data:
-                 expected_value = data.get(expected_value)
+            if isinstance(expected_value, tuple) and expected_value[0] == "col":
+                 expected_value = data.get(expected_value[1])
 
             if actual_value is None:
                 return {"passed": False, "message": f"Column {column}C is empty"}

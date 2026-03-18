@@ -1,5 +1,5 @@
 # Real-Time File Monitoring System
-**Capstone Project - Sriram Ramanathan (202117B3762)**
+**Capstone Project - Author Name**
 
 A dynamic, rule-driven file validation system designed to automate compliance monitoring for financial and operational files.
 

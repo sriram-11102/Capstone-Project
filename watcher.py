@@ -5,7 +5,7 @@ This script acts as the entry point for the "Production Mode" of the system.
 It actively monitors the 'input/' directory for new files, passes them to the
 ValidationEngine, and moves them to 'processed/' or 'rejected/' based on the result.
 
-Author: Sriram
+Author: Author Name
 Last Updated: Jan 2026
 """
 

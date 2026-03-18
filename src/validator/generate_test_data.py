@@ -62,13 +62,13 @@ def generate_row(is_valid, num_columns=75):
     # --- Column 4: Amount ---
     # Rule: Must be a positive number
     if is_valid:
-        row.append(round(random.uniform(10, 10000), 2))
+        row.append(f"{random.uniform(10, 10000):.2f}")
     else:
         # Inject negative amount
         if random.random() < 0.5:
-            row.append(-100.50)
+            row.append("-100.50")
         else:
-            row.append(round(random.uniform(10, 10000), 2))
+            row.append(f"{random.uniform(10, 10000):.2f}")
             
     # --- Column 5: Account Type ---
     # Rule: Must be Savings, Current, or Corporate
@@ -84,16 +84,26 @@ def generate_row(is_valid, num_columns=75):
     # --- Column 6: Risk Score ---
     # Rule: 0 to 100
     if is_valid:
-        row.append(random.randint(0, 100))
+        row.append(str(random.randint(0, 100)))
     else:
         if random.random() < 0.3:
-            row.append(999) # Invalid score
+            row.append("999") # Invalid score
         else:
-            row.append(random.randint(0, 100))
+            row.append(str(random.randint(0, 100)))
 
-    # --- Columns 7-75: Filler Data ---
+    # --- Column 7: Test negative number ---
+    if is_valid:
+        row.append("-444")
+    else:
+        # Inject positive number
+        if random.random() < 0.5:
+            row.append("444")
+        else:
+            row.append("-444")
+
+    # --- Columns 8-75: Filler Data ---
     # Used to test system performance with wide files
-    for i in range(7, num_columns + 1):
+    for i in range(8, num_columns + 1):
         row.append(f"Val_{i}_{random.randint(100,999)}")
         
     return row
